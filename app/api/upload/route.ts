@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { r2Client } from "@/lib/r2";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +12,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Convert file to buffer
+    // Check if file is PDF
+    if (file.type !== "application/pdf") {
+      return NextResponse.json(
+        { error: "Only PDF files are supported" },
+        { status: 400 }
+      );
+    }
+
+    // Convert file to buffer for R2 upload
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -28,12 +37,22 @@ export async function POST(request: NextRequest) {
 
     await r2Client.send(command);
 
+    // Parse PDF text using LangChain
+    const loader = new PDFLoader(new Blob([buffer]));
+    const docs = await loader.load();
+    const combinedText = docs.map((doc) => doc.pageContent).join("\n");
+
     return NextResponse.json({
       success: true,
       filename,
+      text: combinedText, // Return the extracted text
+      pageCount: docs.length, // Return number of pages
     });
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Upload failed" },
+      { status: 500 }
+    );
   }
 }

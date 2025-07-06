@@ -1,7 +1,7 @@
 "use client";
 
-import generateQuiz from "@/actions/generateQuiz";
 import UploadInput from "@/components/upload/UploadInput";
+import generateQuiz from "@/utils/generateQuiz";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -32,8 +32,8 @@ const UploadForm = () => {
           description: "Your document has been processed successfully! 🎉",
         });
 
-        // Parse the text from PDF using langchain
-        // const quiz = await generateQuiz(result.data.text);
+        const quiz = await generateQuiz(result.text);
+        console.log(quiz);
       } else {
         toast.error(result.error || "Upload failed", {
           id: loadingToast,
