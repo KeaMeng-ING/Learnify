@@ -182,3 +182,21 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Or use a CSS variable */
+.toaster [data-description] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* For different toast types */
+.toaster [data-type="loading"] [data-description] {
+  color: #6b7280 !important; /* gray-500 */
+}
+
+.toaster [data-type="error"] [data-description] {
+  color: #ef4444 !important; /* red-500 */
+}
+
+.toaster [data-type="success"] [data-description] {
+  color: #10b981 !important; /* green-500 */
+}
