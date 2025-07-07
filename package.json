@@ -16,6 +16,7 @@
     "@langchain/community": "^0.3.48",
     "@prisma/client": "^6.11.1",
     "@prisma/extension-accelerate": "^2.0.1",
+    "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -33,7 +33,9 @@ const UploadForm = () => {
         });
 
         const quiz = await generateQuiz(result.text);
-        console.log(quiz);
+
+        // redirect to quiz flashcard
+        window.location.href = `/quiz/${quiz.id}`;
       } else {
         toast.error(result.error || "Upload failed", {
           id: loadingToast,
