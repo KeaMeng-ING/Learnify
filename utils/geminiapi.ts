@@ -1,3 +1,4 @@
+import AI_PROMPT from "@/utils/prompts";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize the Gemini API with your API key
@@ -16,16 +17,7 @@ export const generateQnAFromGemini = async (pdfText: string) => {
           role: "user",
           parts: [
             {
-              text: `You are an AI study assistant.
-Given the text below, generate exactly 10 questions and answers.
-Each question should test understanding of the content.
-Each answer must be clear and complete — short if a word or phrase makes sense, or a full sentence if needed.
-Do not create multiple choice options.
-Keep answers natural and easy to understand.
-Format the output exactly like this:
-Question 1: [question]
-Answer 1: [answer]
-... up to 10.
+              text: `${AI_PROMPT}
 
 Text:
 ${pdfText}`,

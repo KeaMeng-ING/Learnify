@@ -4,19 +4,6 @@ import { BookOpen, Sparkles, RotateCcw } from "lucide-react";
 const loading = () => {
   return (
     <div className="h-screen relative overflow-hidden bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Large floating circles */}
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-blue-400/20 rounded-full animate-pulse" />
-        <div className="absolute top-1/4 right-10 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full animate-pulse delay-1000" />
-        <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-gradient-to-br from-blue-400/20 to-teal-400/20 rounded-full animate-pulse delay-2000" />
-
-        {/* Floating particles */}
-        <div className="absolute top-1/3 left-1/5 w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-500" />
-        <div className="absolute top-2/3 right-1/4 w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-1500" />
-        <div className="absolute bottom-1/4 left-2/3 w-4 h-4 bg-pink-400 rounded-full animate-bounce delay-700" />
-      </div>
-
       {/* Main Loading Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         {/* Loading Card Animation */}
@@ -74,27 +61,6 @@ const loading = () => {
           <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" />
           <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-200" />
           <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce delay-400" />
-        </div>
-
-        {/* Loading Progress Bar */}
-        <div className="w-80 bg-white/70 backdrop-blur-sm rounded-full h-2 overflow-hidden shadow-inner">
-          <div className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-pink-500 rounded-full animate-progress" />
-        </div>
-
-        {/* Loading Stats Preview */}
-        <div className="mt-8 grid grid-cols-3 gap-4 w-80">
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg mx-auto mb-2 animate-pulse" />
-            <p className="text-xs text-gray-600">Questions</p>
-          </div>
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-500 rounded-lg mx-auto mb-2 animate-pulse delay-500" />
-            <p className="text-xs text-gray-600">Knowledge</p>
-          </div>
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50">
-            <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg mx-auto mb-2 animate-pulse delay-1000" />
-            <p className="text-xs text-gray-600">Progress</p>
-          </div>
         </div>
       </div>
     </div>

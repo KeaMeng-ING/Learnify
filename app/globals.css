@@ -346,3 +346,25 @@ html {
 .animation-delay-2000 {
   animation-delay: 2s;
 }
+
+.is-shuffling {
+  animation: shuffle-bounce 0.6s ease-in-out;
+}
+
+@keyframes shuffle-bounce {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  20% {
+    transform: scale(1.05) rotate(3deg);
+  }
+  50% {
+    transform: scale(0.98) rotate(-3deg);
+  }
+  80% {
+    transform: scale(1.03) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}

@@ -7,20 +7,38 @@ import { auth } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
-interface QuizData {
+type QuizData = {
   question: string;
   answer: string;
-}
+};
 
-function parseQuizText(quizText: string): QuizData[] {
+type ParsedQuiz = {
+  title: string | null;
+  summary: string | null;
+  questions: QuizData[];
+};
+
+function parseQuizText(quizText: string): ParsedQuiz {
   const lines = quizText.split("\n").filter((line) => line.trim());
   const questions: QuizData[] = [];
 
   let currentQuestion = "";
   let currentAnswer = "";
+  let title: string | null = null;
+  let summary: string | null = null;
 
   for (const line of lines) {
-    if (line.startsWith("Question")) {
+    if (line.startsWith("Title:")) {
+      const titleMatch = line.match(/Title:\s*(.+)/);
+      if (titleMatch) {
+        title = titleMatch[1];
+      }
+    } else if (line.startsWith("Summary:")) {
+      const summaryMatch = line.match(/Summary:\s*(.+)/);
+      if (summaryMatch) {
+        summary = summaryMatch[1];
+      }
+    } else if (line.startsWith("Question")) {
       const questionMatch = line.match(/Question \d+: (.+)/);
       if (questionMatch) {
         currentQuestion = questionMatch[1];
@@ -39,7 +57,7 @@ function parseQuizText(quizText: string): QuizData[] {
     }
   }
 
-  return questions;
+  return { title, summary, questions };
 }
 
 export default async function generateQuiz(text: string) {
@@ -66,6 +84,7 @@ export default async function generateQuiz(text: string) {
       throw error;
     }
   }
+  console.log("Generated Quiz Content:", quiz);
 
   if (!quiz) {
     throw new Error("Failed to generate quiz content");
@@ -79,9 +98,10 @@ export default async function generateQuiz(text: string) {
 
   // Parse the quiz text into structured data
   const quizData = parseQuizText(quiz);
+  console.log(quizData);
 
-  if (quizData.length === 0) {
-    throw new Error("No valid questions found in generated content");
+  if (!quizData.questions.length) {
+    throw new Error("No questions generated from the provided text");
   }
 
   try {
@@ -89,11 +109,12 @@ export default async function generateQuiz(text: string) {
     const savedQuiz = await prisma.quiz.create({
       data: {
         userId,
-        title: `Quiz - ${new Date().toLocaleDateString()}`,
+        title: quizData.title || "Untitled Quiz",
+        summary: quizData.summary,
         questions: {
-          create: quizData.map((item) => ({
-            question: item.question,
-            answer: item.answer,
+          create: quizData.questions.map((q) => ({
+            question: q.question,
+            answer: q.answer,
           })),
         },
       },

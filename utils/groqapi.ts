@@ -1,3 +1,4 @@
+import AI_PROMPT from "@/utils/prompts";
 import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -8,18 +9,7 @@ export async function getGroqChatCompletion(pdfText: string) {
       messages: [
         {
           role: "system",
-          content: `You are an AI study assistant.
-Given any input text, generate exactly 10 questions and answers.
-Each question should test understanding of the text.
-Each answer must be clear and complete — short if a word or phrase makes sense, or a full sentence if needed.
-Do not create multiple choice options.
-Keep answers natural and easy to understand.
-Return the output in this format:
-Question 1: [your question]
-Answer 1: [your answer]
-Question 2: [your question]
-Answer 2: [your answer]
-... up to as many possible but maximum should be 20.`,
+          content: AI_PROMPT,
         },
         {
           role: "user",
