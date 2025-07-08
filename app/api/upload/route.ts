@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { r2Client } from "@/lib/r2";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { PrismaClient } from "@/app/generated/prisma";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,5 +57,27 @@ export async function POST(request: NextRequest) {
       { error: error instanceof Error ? error.message : "Upload failed" },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const flashcards = await prisma.quiz.findUnique({
+      where: {
+        id: "cmcsweblt0000wpz6ah3nao7v",
+      },
+      include: {
+        questions: true,
+      },
+    });
+
+    if (!flashcards) {
+      return new NextResponse("Quiz not found", { status: 404 });
+    }
+
+    return NextResponse.json(flashcards);
+  } catch (error) {
+    console.error("Error fetching flashcards:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

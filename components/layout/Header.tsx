@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <nav className="container flex items-center justify-between py-4 lg:px-8 px-2 mx-auto">
+    <nav className="container flex items-center justify-between py-4 lg:px-8 px-2 mx-auto fixed z-100">
       <div className="flex lg:flex-1">
         <NavLink href="/" className="flex items-center gap-1 lg:gap-2 shrink-0">
           <Image
@@ -23,7 +23,7 @@ export default function Header() {
       <div className="flex lg:justify-center gap-4 lg:gap-12 lg:items-center">
         <NavLink href="/#pricing">Pricing</NavLink>
         <SignedIn>
-          <NavLink href="/dashboard">Your Summaries</NavLink>
+          <NavLink href="/dashboard">Your Quizzes</NavLink>
         </SignedIn>
       </div>
 

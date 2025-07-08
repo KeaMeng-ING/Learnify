@@ -11,55 +11,52 @@ import {
   X,
   BarChart3,
 } from "lucide-react";
+import Confetti from "react-confetti";
+import { Button } from "@/components/ui/button";
+import BgGradient from "@/components/layout/BgGradient";
+import ProgressBar from "@/components/flashcards/ProgressBar";
 
-const mockFlashcards = [
-  {
-    id: 1,
-    question: "What is the purpose of the App Router in Next.js 13+?",
-    answer:
-      "The App Router provides a new way to structure pages with layouts, nested routes, and better server-side rendering capabilities.",
-  },
-  {
-    id: 2,
-    question: "Explain server components in Next.js.",
-    answer:
-      "Server components allow rendering parts of the UI on the server, reducing client-side bundle size and improving performance.",
-  },
-  {
-    id: 3,
-    question: "What are React Server Components?",
-    answer:
-      "React Server Components are a new paradigm that allows components to be rendered on the server, sending only the rendered output to the client.",
-  },
-  {
-    id: 4,
-    question: "How does Next.js handle API routes?",
-    answer:
-      "Next.js API routes allow you to create serverless functions that handle HTTP requests, providing a full-stack solution within your Next.js application.",
-  },
-  {
-    id: 5,
-    question: "What is the difference between SSR and SSG in Next.js?",
-    answer:
-      "SSR (Server-Side Rendering) renders pages on each request, while SSG (Static Site Generation) pre-renders pages at build time for better performance.",
-  },
-];
+type Quiz = {
+  id: string;
+  question: string;
+  answer: string;
+  quizId: string;
+};
 
 export default function FlashcardApp() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [cards, setCards] = useState(mockFlashcards);
+  const [cards, setCards] = useState<Quiz[]>([]);
+
   const [isShuffling, setIsShuffling] = useState(false);
   const [slideDirection, setSlideDirection] = useState("");
   const [knownCards, setKnownCards] = useState(new Set());
   const [unknownCards, setUnknownCards] = useState(new Set());
   const [showStats, setShowStats] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [hasCelebrated, setHasCelebrated] = useState(false);
 
-  const currentCard = cards[currentIndex];
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      const res = await fetch("/api/upload");
+      if (!res.ok) {
+        console.error("Failed to load flashcards");
+        return;
+      }
+      const data = await res.json();
+      setCards(data.questions);
+    };
+
+    fetchFlashcards();
+  }, []);
 
   const flipCard = () => {
     setIsFlipped(!isFlipped);
   };
+
+  const currentCard = cards[currentIndex];
+  if (!currentCard) return null; // safeguard
 
   const markAsKnown = () => {
     const cardId = currentCard.id;
@@ -87,10 +84,25 @@ export default function FlashcardApp() {
     if (currentIndex < cards.length - 1) {
       setSlideDirection("slide-left");
       setTimeout(() => {
-        setCurrentIndex(currentIndex + 1);
+        const nextIndex = currentIndex + 1;
+        setCurrentIndex(nextIndex);
         setIsFlipped(false);
         setSlideDirection("");
+
+        if (nextIndex >= cards.length - 1 && !hasCelebrated) {
+          setShowCelebration(true);
+          setShowConfetti(true);
+          setHasCelebrated(true); // Mark as celebrated
+          setTimeout(() => setShowConfetti(false), 5000);
+        }
       }, 200);
+    } else {
+      if (!hasCelebrated) {
+        setShowCelebration(true);
+        setShowConfetti(true);
+        setHasCelebrated(true); // Mark as celebrated
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
     }
   };
 
@@ -111,8 +123,9 @@ export default function FlashcardApp() {
     setSlideDirection("");
     setKnownCards(new Set());
     setUnknownCards(new Set());
+    setShowCelebration(false);
+    setHasCelebrated(false); // Reset celebration flag
   };
-
   const shuffleCards = () => {
     setIsShuffling(true);
     setTimeout(() => {
@@ -133,65 +146,26 @@ export default function FlashcardApp() {
   const isCurrentCardUnknown = unknownCards.has(currentCard.id);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 relative overflow-hidden">
+    <div className="h-screen relative overflow-hidden ">
       {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-purple-200/20 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-20 w-48 h-48 bg-blue-200/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-1/3 w-56 h-56 bg-pink-200/20 rounded-full blur-3xl" />
-      </div>
+      <BgGradient />
 
       {/* Main Content */}
-      <div className="relative z-10 px-4 max-w-4xl mx-auto pt-6">
+      <div className="relative z-10 px-4 flex flex-col items-center justify-center min-h-screen max-w-4xl mx-auto ">
         {/* Progress Bar */}
-        <div className="mb-8 bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50">
-          <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
-            <span className="font-medium">Progress</span>
-            <div className="flex items-center gap-4">
-              <span className="font-medium">
-                {currentIndex + 1} / {cards.length}
-              </span>
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-              >
-                <BarChart3 size={12} />
-                Stats
-              </button>
-            </div>
-          </div>
-          <div className="w-full bg-gray-200/50 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          {/* Stats */}
-          {showStats && (
-            <div className="mt-4 pt-4 border-t border-gray-200/50">
-              <div className="flex justify-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-600">Known: {knownCount}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-gray-600">Unknown: {unknownCount}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-600">
-                    Unanswered: {cards.length - totalAnswered}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <ProgressBar
+          currentIndex={currentIndex}
+          total={cards.length}
+          progress={progress}
+          knownCount={knownCount}
+          unknownCount={unknownCount}
+          totalAnswered={totalAnswered}
+          showStats={showStats}
+          toggleStats={() => setShowStats(!showStats)}
+        />
 
         {/* Flashcard Container */}
-        <div className="relative perspective-1000 mb-8">
+        <div className="relative w-full perspective-1000 mb-8">
           <div
             className={`relative w-full h-96 transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer ${
               isFlipped ? "rotate-y-180" : ""
@@ -281,7 +255,7 @@ export default function FlashcardApp() {
         </div>
 
         {/* Navigation Controls */}
-        <div className="flex justify-center items-center gap-4 mb-8">
+        <div className="flex justify-center items-center gap-4 ">
           <button
             onClick={prevCard}
             disabled={currentIndex === 0}
@@ -315,10 +289,11 @@ export default function FlashcardApp() {
           {!isFlipped ? (
             <button
               onClick={markAsKnown}
-              disabled={currentIndex === cards.length - 1}
+              // remove disabled or modify condition
               className={`flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 ${
+                // no disabling, just styling change if last card
                 currentIndex === cards.length - 1
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105"
                   : "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
               }`}
             >
@@ -336,6 +311,49 @@ export default function FlashcardApp() {
           )}
         </div>
       </div>
+
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          {showConfetti && (
+            <Confetti width={window.innerWidth} height={window.innerHeight} />
+          )}
+          <div className="relative bg-white/90 backdrop-blur-lg p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full animate-scale-in">
+            {/* Close Button */}
+            <Button
+              onClick={() => setShowCelebration(false)}
+              className="absolute top-4 right-4 p-2 rounded-full  text-black  transition "
+              aria-label="Close celebration"
+            >
+              <X size={24} className="flex-shrink-0" />
+            </Button>
+
+            <h2 className="text-3xl font-extrabold text-purple-700 mb-4">
+              🎉 Well Done!
+            </h2>
+            <p className="text-gray-700 text-lg mb-4">
+              You’ve mastered all the flashcards.
+            </p>
+            <p className="text-gray-600 mb-6">
+              Keep learning and try new quizzes to expand your knowledge!
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={resetCards}
+                className="flex-1 px-5 py-3 rounded-xl bg-purple-500 hover:bg-purple-700 text-white font-semibold shadow-md transition-all"
+              >
+                🔁 Restart Practice
+              </button>
+              <button
+                onClick={() => (window.location.href = "/quizzes")}
+                className="flex-1 px-5 py-3 rounded-xl bg-blue-400 hover:bg-blue-600 text-white font-semibold shadow-md transition-all"
+              >
+                📚 All Quizzes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

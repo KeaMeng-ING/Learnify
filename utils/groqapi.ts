@@ -19,7 +19,7 @@ Question 1: [your question]
 Answer 1: [your answer]
 Question 2: [your question]
 Answer 2: [your answer]
-... up to 10.`,
+... up to as many possible but maximum should be 20.`,
         },
         {
           role: "user",
