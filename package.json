@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint --ignore-path .eslintignore",
+    "lint:fix": "next lint --fix --ignore-path .eslintignore"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",

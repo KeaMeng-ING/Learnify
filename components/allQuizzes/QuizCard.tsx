@@ -3,7 +3,17 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
-export default function QuizCard({ quiz }: { quiz: any }) {
+interface QuizCardProps {
+  quiz: {
+    id: string;
+    title: string | null;
+    summary: string | null;
+    createdAt: Date;
+    complete: boolean | null;
+  };
+}
+
+export default function QuizCard({ quiz }: QuizCardProps) {
   return (
     <div className="w-100">
       <div className="relative h-full bg-white border-1 border-gray-200">
@@ -20,9 +30,7 @@ export default function QuizCard({ quiz }: { quiz: any }) {
                 {quiz.title}
               </h3>
               <p className="text-sm text-gray-500">
-                {formatDistanceToNow(new Date(quiz.createdAt), {
-                  addSuffix: true,
-                })}
+                {formatDistanceToNow(quiz.createdAt, { addSuffix: true })}
               </p>
             </div>
           </div>

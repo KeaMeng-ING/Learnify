@@ -109,15 +109,15 @@ async function createPayment({
   userEmail: string;
 }) {
   try {
-    const { amount_total, id, customer_email, status } = session;
+    const { amount_total, id, status } = session;
 
-    const payment = await prisma.payment.create({
+    await prisma.payment.create({
       data: {
         amount: amount_total ?? 0,
         userEmail: userEmail,
         priceId: priceId,
         status: status as "paid" | "unpaid" | "pending",
-        stripePaymentId: id, // Assuming 'id' is the Stripe payment ID
+        stripePaymentId: id,
       },
     });
   } catch (error) {

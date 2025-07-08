@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(updatedQuiz);
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Failed to update quiz" },
       { status: 500 }
