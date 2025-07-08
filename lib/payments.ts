@@ -34,6 +34,34 @@ export async function handleCheckoutSessionCompleted({
   }
 }
 
+export async function handleSubscriptionDeleted({
+  subscriptionId,
+  stripe,
+}: {
+  subscriptionId: string;
+  stripe: Stripe;
+}) {
+  console.log("Subscription deleted", subscriptionId);
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    // Update the user's status to inactive
+    await prisma.user.update({
+      where: { customerId: subscription.customer as string },
+      data: { status: "cancelled" },
+    });
+
+    console.log(
+      "User status updated to cancelled for subscription",
+      subscriptionId
+    );
+  } catch (error) {
+    console.error("Error handling subscription deletion", error);
+    throw error;
+  }
+}
+
 async function createOrUpdateUser({
   email,
   fullName,
