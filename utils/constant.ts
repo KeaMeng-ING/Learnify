@@ -27,3 +27,45 @@ export const pricingPlans = [
     priceId: "price_1RiXAAFKFEDTLG9rP09lWaVa",
   },
 ];
+
+export const sampleQuestions = [
+  {
+    id: "q1",
+    question:
+      "What is the primary advantage of Next.js over traditional React applications?",
+    answer:
+      "Next.js provides server-side rendering (SSR) and static site generation (SSG) out of the box, improving SEO and initial page load performance compared to client-side only React apps.",
+    quizId: "demo",
+  },
+  {
+    id: "q2",
+    question:
+      "What is the difference between getStaticProps and getServerSideProps in Next.js?",
+    answer:
+      "getStaticProps runs at build time and generates static pages, while getServerSideProps runs on each request on the server, allowing for dynamic content that changes frequently.",
+    quizId: "demo",
+  },
+  {
+    id: "q3",
+    question: "How does Next.js handle automatic code splitting?",
+    answer:
+      "Next.js automatically splits your code by pages, meaning each page only loads the JavaScript it needs. It also supports dynamic imports for further code splitting within components.",
+    quizId: "demo",
+  },
+  {
+    id: "q4",
+    question:
+      "What is the App Router in Next.js 13+ and how does it differ from the Pages Router?",
+    answer:
+      "The App Router uses the app/ directory and supports React Server Components, nested layouts, and streaming. It provides better performance and developer experience compared to the traditional pages/ directory approach.",
+    quizId: "demo",
+  },
+  {
+    id: "q5",
+    question:
+      "Explain the concept of Incremental Static Regeneration (ISR) in Next.js",
+    answer:
+      "ISR allows you to update static content after build time without rebuilding the entire site. Pages can be regenerated in the background when traffic comes in, combining the benefits of static and dynamic rendering.",
+    quizId: "demo",
+  },
+];

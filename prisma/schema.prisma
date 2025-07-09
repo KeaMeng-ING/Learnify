@@ -34,6 +34,7 @@ model Quiz {
   id        String   @id @default(cuid())
   title     String?
   summary   String?
+  minRead   Int?
   userId    String
   complete  Boolean? @default(false)
   createdAt DateTime @default(now())

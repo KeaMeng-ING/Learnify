@@ -15,6 +15,7 @@ type QuizData = {
 type ParsedQuiz = {
   title: string | null;
   summary: string | null;
+  minuteRead: number | null;
   questions: QuizData[];
 };
 
@@ -26,6 +27,7 @@ function parseQuizText(quizText: string): ParsedQuiz {
   let currentAnswer = "";
   let title: string | null = null;
   let summary: string | null = null;
+  let minuteRead: number | null = null;
 
   for (const line of lines) {
     if (line.startsWith("Title:")) {
@@ -37,6 +39,11 @@ function parseQuizText(quizText: string): ParsedQuiz {
       const summaryMatch = line.match(/Summary:\s*(.+)/);
       if (summaryMatch) {
         summary = summaryMatch[1];
+      }
+    } else if (line.startsWith("Minute Read:")) {
+      const minuteReadMatch = line.match(/Minute Read:\s*(\d+)/);
+      if (minuteReadMatch) {
+        minuteRead = parseInt(minuteReadMatch[1], 10);
       }
     } else if (line.startsWith("Question")) {
       const questionMatch = line.match(/Question \d+: (.+)/);
@@ -57,7 +64,7 @@ function parseQuizText(quizText: string): ParsedQuiz {
     }
   }
 
-  return { title, summary, questions };
+  return { title, summary, questions, minuteRead };
 }
 
 export default async function generateQuiz(text: string) {
@@ -98,7 +105,6 @@ export default async function generateQuiz(text: string) {
 
   // Parse the quiz text into structured data
   const quizData = parseQuizText(quiz);
-  console.log(quizData);
 
   if (!quizData.questions.length) {
     throw new Error("No questions generated from the provided text");
@@ -111,6 +117,7 @@ export default async function generateQuiz(text: string) {
         userId,
         title: quizData.title || "Untitled Quiz",
         summary: quizData.summary,
+        minRead: quizData.minuteRead || null,
         questions: {
           create: quizData.questions.map((q) => ({
             question: q.question,

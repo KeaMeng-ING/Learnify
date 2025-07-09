@@ -1,7 +1,6 @@
 import DemoSection from "@/components/home/DemoSection";
 import HeroSection from "@/components/home/HeroSection";
 import HowItWork from "@/components/home/HowItWork";
-import PlanBadge from "@/components/home/PlanBadge";
 import PricingSection from "@/components/home/PricingSection";
 import BgGradient from "@/components/layout/BgGradient";
 

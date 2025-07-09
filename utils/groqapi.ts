@@ -13,7 +13,7 @@ export async function getGroqChatCompletion(pdfText: string) {
         },
         {
           role: "user",
-          content: `Here is the extracted text:\n\n${pdfText}\n\nPlease generate 10 short-answer questions and answers based only on this content.`,
+          content: `Here is the extracted text:\n\n${pdfText}\n\nPlease generate short-answer questions and answers based only on this content.`,
         },
       ],
       model: "llama-3.3-70b-versatile",
