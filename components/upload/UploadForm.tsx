@@ -1,11 +1,14 @@
 "use client";
 
 import UploadInput from "@/components/upload/UploadInput";
+import { hasReachedUploadLimit } from "@/lib/user";
 import generateQuiz from "@/utils/generateQuiz";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-const UploadForm = () => {
+const UploadForm = ({ limit }: { limit: boolean }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (file: File) => {
@@ -55,7 +58,21 @@ const UploadForm = () => {
     }
   };
 
-  return (
+  return limit ? (
+    <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 text-rose-800">
+      <p className="text-sm">
+        You've reached the limit uploads on the Basic plan.{" "}
+        <Link
+          href="/#pricing"
+          className="text-rose-800 underline font-medium underline-offset-4 inline-flex items-center"
+        >
+          Click here to upgrade to Pro{" "}
+          <ArrowRight className="w-4 h-4 inline-block" />
+        </Link>{" "}
+        for unlimited uploads.
+      </p>
+    </div>
+  ) : (
     <div>
       <UploadInput onSubmit={handleSubmit} isLoading={isLoading} />
     </div>
