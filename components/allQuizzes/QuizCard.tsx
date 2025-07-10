@@ -10,7 +10,18 @@ import { deleteQuiz } from "@/lib/deleteQuiz";
 import LoadingOverlay from "@/components/allQuizzes/LoadingOverlay";
 import ConfirmModal from "@/components/allQuizzes/ConfirmModal";
 
-export default function QuizCard({ quiz }: { quiz: any }) {
+type Quiz = {
+  id: string;
+  title: string | null;
+  summary: string | null;
+  minRead: number | null;
+  complete: boolean | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  userId: string;
+};
+
+export default function QuizCard({ quiz }: { quiz: Quiz }) {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();

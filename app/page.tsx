@@ -4,7 +4,6 @@ import HeroSection from "@/components/home/HeroSection";
 import HowItWork from "@/components/home/HowItWork";
 import PricingSection from "@/components/home/PricingSection";
 import BgGradient from "@/components/layout/BgGradient";
-import { Cat } from "lucide-react";
 
 export default function Home() {
   console.log("sdf");

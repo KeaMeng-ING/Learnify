@@ -1,7 +1,6 @@
 "use client";
 
 import UploadInput from "@/components/upload/UploadInput";
-import { hasReachedUploadLimit } from "@/lib/user";
 import generateQuiz from "@/utils/generateQuiz";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -61,7 +60,7 @@ const UploadForm = ({ limit }: { limit: boolean }) => {
   return limit ? (
     <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 text-rose-800">
       <p className="text-sm">
-        You've reached the limit uploads on the Basic plan.{" "}
+        You&#39;ve reached the limit uploads on the Basic plan.{" "}
         <Link
           href="/#pricing"
           className="text-rose-800 underline font-medium underline-offset-4 inline-flex items-center"

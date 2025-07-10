@@ -1,0 +1,15 @@
+# Gener# Generated or compiled code
+app/generated/**
+**/generated/**
+.next/
+node_modules/
+
+# Specifically ignore Prisma generated files
+**/prisma/runtime/**
+**/prisma/client/**
+**/prisma/index.js
+**/prisma/index.d.ts
+
+# Common minified files
+**/*.min.js
+**/*.bundle.js

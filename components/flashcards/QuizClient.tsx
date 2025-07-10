@@ -448,7 +448,7 @@ export default function QuizClient({
               className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
               <X size={18} />
-              <span className="font-medium">I don't know this</span>
+              <span className="font-medium">I don&#39;t know this</span>
             </button>
           )}
         </div>
@@ -473,7 +473,7 @@ export default function QuizClient({
               🎉 Well Done!
             </h2>
             <p className="text-gray-700 text-lg mb-4">
-              You've mastered all the flashcards.
+              You&#39;ve mastered all the flashcards.
             </p>
             <p className="text-gray-600 mb-6">
               Keep learning and try new quizzes to expand your knowledge!

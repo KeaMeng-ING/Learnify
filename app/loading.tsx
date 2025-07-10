@@ -1,5 +1,5 @@
 import React from "react";
-import { BookOpen, Sparkles, RotateCcw } from "lucide-react";
+import { BookOpen, Sparkles } from "lucide-react";
 
 const loading = () => {
   return (
