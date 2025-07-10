@@ -1,13 +1,25 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { pricingPlans } from "@/utils/constant";
 
+const startOfToday = new Date();
+startOfToday.setHours(0, 0, 0, 0);
+
+const startOfTomorrow = new Date(startOfToday);
+startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
 const prisma = new PrismaClient();
 export async function getPriceId(email: string) {
   try {
     const user = await prisma.user.findUnique({
-      where: { email, status: "active" },
-      select: { priceId: true },
+      where: { email },
     });
+
+    if (!user) {
+      console.warn(`User with email ${email} not found.`);
+      return null;
+    } else if (user?.status === "inactive") {
+      return null;
+    }
 
     return user?.priceId || null;
   } catch (error) {
@@ -17,12 +29,6 @@ export async function getPriceId(email: string) {
     await prisma.$disconnect();
   }
 }
-
-const startOfToday = new Date();
-startOfToday.setHours(0, 0, 0, 0);
-
-const startOfTomorrow = new Date(startOfToday);
-startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
 export async function hasReachedUploadLimit(userId: string, email: string) {
   try {
@@ -49,5 +55,17 @@ export async function hasReachedUploadLimit(userId: string, email: string) {
     return true;
   } finally {
     await prisma.$disconnect();
+  }
+}
+
+export async function getStatus(email: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    return user?.status || "inactive";
+  } catch (error) {
+    console.error("Error fetching user status:", error);
+    return "inactive";
   }
 }

@@ -8,8 +8,8 @@ import { PrismaClient } from "@/app/generated/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
+const prisma = new PrismaClient();
 const page = async () => {
-  const prisma = new PrismaClient();
   const { userId } = await auth();
 
   if (!userId) {
@@ -21,7 +21,7 @@ const page = async () => {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6 text-center w-full">
+    <div className="flex flex-col items-center justify-center gap-6 text-center w-full sm:px-14">
       <BgGradient className="from-purple-500 via-cyan-500 to-blue-500" />
       <div className="flex justify-between items-center w-full px-8 mt-10">
         <div className="">
@@ -46,9 +46,11 @@ const page = async () => {
             <p className="text-gray-500">
               Upload your first PDF to get started with AI-Powered quiz
             </p>
-            <Button className="bg-gradient-to-r from-purple-500 to-purple-700 mt-5">
-              <Link href="/upload">Create Your First Quiz</Link>
-            </Button>
+            <Link href="/upload">
+              <Button className="bg-gradient-to-r from-purple-500 to-purple-700 mt-5">
+                Create Your First Quiz
+              </Button>
+            </Link>
           </div>
         )}
         {quizzes.map((quiz) => (

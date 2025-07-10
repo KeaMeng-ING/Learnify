@@ -59,7 +59,7 @@ export default function QuizCard({ quiz }: { quiz: any }) {
               </div>
             </div>
 
-            <div className="line-clamp-2 text-gray-500 px-4 text-left">
+            <div className="line-clamp-2 text-gray-500 px-4 text-left h-12">
               {quiz.summary}
             </div>
 
