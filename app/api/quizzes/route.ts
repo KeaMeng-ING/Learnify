@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const flashcards = await prisma.quiz.findUnique({
+    const flashcards = await prisma.quiz.findFirst({
       where: { id },
       include: {
         questions: true,

@@ -9,5 +9,12 @@ export default async function QuizPage({
   const res = await fetch(`http://localhost:3000/api/quizzes?id=${quizId}`);
   const data = await res.json();
 
-  return <QuizClient questions={data.questions} id={quizId} />;
+  return (
+    <QuizClient
+      questions={data.questions}
+      title={data.title}
+      id={quizId}
+      minRead={data.minRead}
+    />
+  );
 }

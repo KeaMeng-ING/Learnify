@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import NavLink from "@/components/layout/NavLink";
 import Image from "next/image";
+import PlanBadge from "@/components/home/PlanBadge";
 
 export default function Header() {
   return (
@@ -23,7 +24,7 @@ export default function Header() {
       <div className="flex lg:justify-center gap-4 lg:gap-12 lg:items-center">
         <NavLink href="/#pricing">Pricing</NavLink>
         <SignedIn>
-          <NavLink href="/allquizzes">Your Quizzes</NavLink>
+          <NavLink href="/dashboard">Your Quizzes</NavLink>
         </SignedIn>
       </div>
 
@@ -31,7 +32,7 @@ export default function Header() {
         <SignedIn>
           <div className="flex gap-2 items-center">
             <NavLink href="/upload">Upload a PDF</NavLink>
-            <div>Pro</div>
+            <PlanBadge />
             <SignedIn>
               <UserButton />
             </SignedIn>

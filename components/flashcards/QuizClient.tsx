@@ -9,11 +9,15 @@ import {
   Sparkles,
   Check,
   X,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { Button } from "@/components/ui/button";
 import BgGradient from "@/components/layout/BgGradient";
 import ProgressBar from "@/components/flashcards/ProgressBar";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 type Quiz = {
   id: string;
@@ -31,10 +35,14 @@ type QuizProgress = {
 };
 
 export default function QuizClient({
+  title,
+  minRead,
   questions,
   id,
 }: {
   questions: Quiz[];
+  title: string;
+  minRead: number | null;
   id: string;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -239,12 +247,55 @@ export default function QuizClient({
   }
 
   return (
-    <div className="h-screen relative overflow-hidden ">
+    <div className="h-screen relative overflow-hidden w-full">
       {/* Background decoration */}
-      <BgGradient />
+      {id !== "demo-quiz" && <BgGradient />}
+
+      <div className="w-full flex flex-col justify-start px-6 sm:px-12 py-8">
+        <div className="flex flex-wrap justify-between items-center mb-4 w-full">
+          <div className="flex flex-wrap items-center gap-4 mb-4 sm:mb-0">
+            <Badge
+              variant="outline"
+              className="bg-white text-purple-500 shadow-md font-bold px-2"
+            >
+              AI Quiz
+            </Badge>
+
+            <div className="flex items-center gap-1 text-purple-500">
+              <Calendar size={18} />
+              <p className="text-sm text-gray-500">
+                {new Date().toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1 text-purple-500">
+              <Clock size={18} />
+              <p className="text-sm text-gray-500">{minRead} min read</p>
+            </div>
+          </div>
+
+          <Link href="/dashboard" className="-translate-y-1.5">
+            <Button
+              variant="secondary"
+              className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300"
+            >
+              <ChevronLeft size={16} />
+              Dashboard
+            </Button>
+          </Link>
+        </div>
+
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500 drop-shadow-sm">
+          {title}
+        </h1>
+      </div>
 
       {/* Main Content */}
-      <div className="relative z-10 px-4 flex flex-col items-center justify-center min-h-screen max-w-4xl mx-auto ">
+      <div className="relative z-10 px-4 flex flex-col items-center justify-center  max-w-4xl mx-auto ">
         {/* Progress Bar */}
         <ProgressBar
           currentIndex={currentIndex}
@@ -397,7 +448,7 @@ export default function QuizClient({
               className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
               <X size={18} />
-              <span className="font-medium">I don&apos;t know this</span>
+              <span className="font-medium">I don&#39;t know this</span>
             </button>
           )}
         </div>
@@ -422,7 +473,7 @@ export default function QuizClient({
               🎉 Well Done!
             </h2>
             <p className="text-gray-700 text-lg mb-4">
-              You&apos;ve mastered all the flashcards.
+              You&#39;ve mastered all the flashcards.
             </p>
             <p className="text-gray-600 mb-6">
               Keep learning and try new quizzes to expand your knowledge!

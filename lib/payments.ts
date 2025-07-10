@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { PrismaClient } from "@/app/generated/prisma";
+import { currentUser } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
@@ -14,11 +15,14 @@ export async function handleCheckoutSessionCompleted({
   const customerId = session.customer as string;
   const customer = await stripe.customers.retrieve(customerId);
   const priceId = session.line_items?.data[0]?.price?.id;
+  const user = await currentUser();
+  const userId = user?.id;
 
   if ("email" in customer && priceId) {
     const { email, name } = customer;
 
     await createOrUpdateUser({
+      id: userId as string,
       email: email as string,
       fullName: name as string,
       customerId,
@@ -63,12 +67,14 @@ export async function handleSubscriptionDeleted({
 }
 
 async function createOrUpdateUser({
+  id,
   email,
   fullName,
   customerId,
   priceId,
   status,
 }: {
+  id: string;
   email: string;
   fullName: string;
   customerId: string;
@@ -85,6 +91,7 @@ async function createOrUpdateUser({
         status,
       },
       create: {
+        id,
         email,
         fullName,
         customerId,
