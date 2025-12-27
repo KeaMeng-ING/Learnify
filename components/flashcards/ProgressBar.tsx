@@ -25,11 +25,11 @@ export default function ProgressBar({
   toggleStats,
 }: ProgressBarProps) {
   return (
-    <div className="mb-8 w-full bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50">
-      <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
-        <span className="font-medium">Progress</span>
-        <div className="flex items-center gap-4">
-          <span className="font-medium">
+    <div className="mb-4 lg:mb-8 w-full bg-white/70 backdrop-blur-sm rounded-xl p-3 lg:p-4 border border-gray-200/50">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 text-sm text-gray-600 mb-3">
+        <span className="font-medium text-xs sm:text-sm">Progress</span>
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+          <span className="font-medium text-xs sm:text-sm">
             {currentIndex + 1} / {total}
           </span>
           <button
@@ -37,7 +37,7 @@ export default function ProgressBar({
             className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
           >
             <BarChart3 size={12} />
-            Stats
+            <span className="hidden xs:inline">Stats</span>
           </button>
         </div>
       </div>
@@ -51,17 +51,17 @@ export default function ProgressBar({
 
       {showStats && (
         <div className="mt-4 pt-4 border-t border-gray-200/50">
-          <div className="flex justify-center gap-6 text-sm">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
               <span className="text-gray-600">Known: {knownCount}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></div>
               <span className="text-gray-600">Unknown: {unknownCount}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+              <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
               <span className="text-gray-600">
                 Unanswered: {total - totalAnswered}
               </span>

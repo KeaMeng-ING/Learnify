@@ -247,11 +247,10 @@ export default function QuizClient({
   }
 
   return (
-    <div className="h-screen relative overflow-hidden w-full">
+    <div className="h-[calc(100vh-64px)] relative  w-full flex flex-col">
       {/* Background decoration */}
       {id !== "demo-quiz" && <BgGradient />}
-
-      <div className="w-full flex flex-col justify-start px-6 sm:px-12 py-8">
+      <div className="container mx-auto px-2 lg:px-8 flex flex-col justify-start py-8">
         <div className="flex flex-wrap justify-between items-center mb-4 w-full">
           <div className="flex flex-wrap items-center gap-4 mb-4 sm:mb-0">
             <Badge
@@ -274,7 +273,7 @@ export default function QuizClient({
 
             <div className="flex items-center gap-1 text-purple-500">
               <Clock size={18} />
-              <p className="text-sm text-gray-500">{minRead} min read</p>
+              <p className="text-sm text-gray-500">{minRead} min quiz</p>
             </div>
           </div>
 
@@ -289,213 +288,178 @@ export default function QuizClient({
           </Link>
         </div>
 
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-red-500 drop-shadow-sm">
-          {title}
-        </h1>
+        <div className="flex flex-col lg:flex-row w-full gap-3 lg:gap-4 items-start">
+          <h1 className="w-full lg:w-[30%] text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-600 to-red-600 drop-shadow-sm mt-4">
+            {title}
+          </h1>
+
+          <div className="w-full lg:flex-1">
+            <ProgressBar
+              currentIndex={currentIndex}
+              total={cards.length}
+              progress={progress}
+              knownCount={knownCount}
+              unknownCount={unknownCount}
+              totalAnswered={totalAnswered}
+              showStats={showStats}
+              toggleStats={() => setShowStats(!showStats)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 px-4 flex flex-col items-center justify-center  max-w-4xl mx-auto ">
-        {/* Progress Bar */}
-        <ProgressBar
-          currentIndex={currentIndex}
-          total={cards.length}
-          progress={progress}
-          knownCount={knownCount}
-          unknownCount={unknownCount}
-          totalAnswered={totalAnswered}
-          showStats={showStats}
-          toggleStats={() => setShowStats(!showStats)}
-        />
+      <div className="relative z-10 container mx-auto px-2 lg:px-8 flex flex-col lg:flex-row items-start lg:items-stretch gap-6">
+        <div className="w-full lg:w-[80%]">
+          {/* Flashcard Container */}
+          <div className="relative w-full perspective-1000 mb-8">
+            <div
+              className={`relative w-full h-[28rem] lg:h-[32rem] transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer ${
+                isFlipped ? "rotate-y-180" : ""
+              } ${slideDirection} ${isShuffling ? "is-shuffling" : ""}`}
+              onClick={flipCard}
+            >
+              {/* Front of card (Question) */}
+              <div className="absolute inset-0 w-full h-full backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200/50 ">
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-pink-400/10 to-purple-400/10 rounded-full translate-y-12 -translate-x-12" />
 
-        {/* Flashcard Container */}
-        <div className="relative w-full perspective-1000 mb-8">
-          <div
-            className={`relative w-full h-96 transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer ${
-              isFlipped ? "rotate-y-180" : ""
-            } ${slideDirection} ${isShuffling ? "is-shuffling" : ""}`}
-            onClick={flipCard}
-          >
-            {/* Front of card (Question) */}
-            <div className="absolute inset-0 w-full h-full backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200/50 overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-blue-400/10 rounded-full -translate-y-16 translate-x-16" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-pink-400/10 to-purple-400/10 rounded-full translate-y-12 -translate-x-12" />
-
-              {/* Card status indicator */}
-              {(isCurrentCardKnown || isCurrentCardUnknown) && (
-                <div className="absolute top-4 right-4">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      isCurrentCardKnown ? "bg-green-500" : "bg-red-500"
-                    }`}
-                  >
-                    {isCurrentCardKnown ? (
-                      <Check size={14} className="text-white" />
-                    ) : (
-                      <X size={14} className="text-white" />
-                    )}
+                {/* Card status indicator */}
+                {(isCurrentCardKnown || isCurrentCardUnknown) && (
+                  <div className="absolute top-4 right-4">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        isCurrentCardKnown ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    >
+                      {isCurrentCardKnown ? (
+                        <Check size={14} className="text-white" />
+                      ) : (
+                        <X size={14} className="text-white" />
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="relative p-8 h-full flex flex-col justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-6">
-                    <BookOpen className="text-white" size={24} />
+                <div className="relative p-8 h-full flex flex-col justify-center">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-6">
+                      <BookOpen className="text-white" size={24} />
+                    </div>
+                    <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                      Question
+                    </h2>
+                    <p className="text-gray-700 text-xl leading-relaxed font-medium max-w-2xl mx-auto">
+                      {currentCard.question}
+                    </p>
                   </div>
-                  <h2 className="text-lg font-semibold text-gray-800 mb-6">
-                    Question
-                  </h2>
-                  <p className="text-gray-700 text-xl leading-relaxed font-medium max-w-2xl mx-auto">
-                    {currentCard.question}
-                  </p>
-                </div>
-                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                    <span>Click to reveal answer</span>
+                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                      <span>Click to reveal answer</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Back of card (Answer) */}
-            <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-3xl bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200/50 overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full -translate-y-16 translate-x-16" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-green-400/10 rounded-full translate-y-12 -translate-x-12" />
+              {/* Back of card (Answer) */}
+              <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-3xl bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200/50 ">
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-green-400/10 rounded-full translate-y-12 -translate-x-12" />
 
-              {/* Card status indicator */}
-              {(isCurrentCardKnown || isCurrentCardUnknown) && (
-                <div className="absolute top-4 right-4">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      isCurrentCardKnown ? "bg-green-500" : "bg-red-500"
-                    }`}
-                  >
-                    {isCurrentCardKnown ? (
-                      <Check size={14} className="text-white" />
-                    ) : (
-                      <X size={14} className="text-white" />
-                    )}
+                {/* Card status indicator */}
+                {(isCurrentCardKnown || isCurrentCardUnknown) && (
+                  <div className="absolute top-4 right-4">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        isCurrentCardKnown ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    >
+                      {isCurrentCardKnown ? (
+                        <Check size={14} className="text-white" />
+                      ) : (
+                        <X size={14} className="text-white" />
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="relative p-8 h-full flex flex-col justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl mb-6">
-                    <Sparkles className="text-white" size={24} />
+                <div className="relative p-8 h-full flex flex-col justify-center">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl mb-6">
+                      <Sparkles className="text-white" size={24} />
+                    </div>
+                    <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                      Answer
+                    </h2>
+                    <p className="text-gray-700 text-xl leading-relaxed font-medium max-w-2xl mx-auto">
+                      {currentCard.answer}
+                    </p>
                   </div>
-                  <h2 className="text-lg font-semibold text-gray-800 mb-6">
-                    Answer
-                  </h2>
-                  <p className="text-gray-700 text-xl leading-relaxed font-medium max-w-2xl mx-auto">
-                    {currentCard.answer}
-                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Navigation Controls */}
-        <div className="flex justify-center items-center gap-4 ">
+        {/* Navigation Controls - 2x2 Grid */}
+        <div className="w-full lg:w-[20%] grid grid-cols-2 gap-4 lg:gap-5 h-[28rem] lg:h-[32rem]">
+          {/* Previous Button */}
           <button
             onClick={prevCard}
             disabled={currentIndex === 0}
-            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${
+            className={`flex items-center justify-center w-full rounded-2xl transition-all duration-300 ${
               currentIndex === 0
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 shadow-lg hover:shadow-xl hover:scale-105 border border-gray-200/50"
+                : "bg-white hover:bg-purple-50 text-purple-600 hover:text-purple-700 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-purple-200"
             }`}
+            title="Previous Card"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={32} />
           </button>
 
-          <div className="flex gap-3">
-            <button
-              onClick={shuffleCards}
-              className="flex items-center justify-center w-12 h-12 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-              title="Shuffle Cards (will reset progress)"
-            >
-              <Shuffle size={18} />
-            </button>
-
-            <button
-              onClick={resetCards}
-              className="flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-              title="Reset Progress"
-            >
-              <RotateCcw size={18} />
-            </button>
-          </div>
-
+          {/* Action Button (I Know / Don't Know) */}
           {!isFlipped ? (
             <button
               onClick={markAsKnown}
-              className={`flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center gap-2 w-full rounded-2xl transition-all duration-300 ${
                 currentIndex === cards.length - 1
-                  ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105"
+                  ? "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
                   : "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
               }`}
             >
-              <Check size={18} />
-              <span className="font-medium">I know this</span>
+              <Check size={28} />
+              <span className="font-semibold text-sm lg:text-base">I Know</span>
             </button>
           ) : (
             <button
               onClick={markAsUnknown}
-              className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              className="flex flex-col items-center justify-center gap-2 w-full rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              <X size={18} />
-              <span className="font-medium">I don&#39;t know this</span>
+              <X size={28} />
+              <span className="font-semibold text-sm lg:text-base">
+                Don&#39;t Know
+              </span>
             </button>
           )}
+
+          {/* Shuffle Button */}
+          <button
+            onClick={shuffleCards}
+            className="flex items-center justify-center w-full rounded-2xl bg-purple-300 hover:bg-purple-400 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            title="Shuffle Cards"
+          >
+            <Shuffle size={28} />
+          </button>
+
+          {/* Reset Button */}
+          <button
+            onClick={resetCards}
+            className="flex items-center justify-center w-full rounded-2xl bg-purple-200 hover:bg-purple-300 text-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            title="Reset Progress"
+          >
+            <RotateCcw size={28} />
+          </button>
         </div>
       </div>
-
-      {showCelebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          {showConfetti && (
-            <Confetti width={window.innerWidth} height={window.innerHeight} />
-          )}
-          <div className="relative bg-white/90 backdrop-blur-lg p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full animate-scale-in">
-            {/* Close Button */}
-            <Button
-              onClick={() => setShowCelebration(false)}
-              className="absolute top-4 right-4 p-2 rounded-full  text-black  transition bg-purple-300 "
-              aria-label="Close celebration"
-            >
-              <X size={24} className="flex-shrink-0" />
-            </Button>
-
-            <h2 className="text-3xl font-extrabold text-purple-700 mb-4">
-              🎉 Well Done!
-            </h2>
-            <p className="text-gray-700 text-lg mb-4">
-              You&#39;ve mastered all the flashcards.
-            </p>
-            <p className="text-gray-600 mb-6">
-              Keep learning and try new quizzes to expand your knowledge!
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={resetCards}
-                className="flex-1 px-5 py-3 rounded-xl bg-purple-500 hover:bg-purple-700 text-white font-semibold shadow-md transition-all"
-              >
-                🔁 Restart Practice
-              </button>
-              <button
-                onClick={() => (window.location.href = "/quizzes")}
-                className="flex-1 px-5 py-3 rounded-xl bg-blue-400 hover:bg-blue-600 text-white font-semibold shadow-md transition-all"
-              >
-                📚 All Quizzes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
