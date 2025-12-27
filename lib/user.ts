@@ -1,5 +1,5 @@
-import { PrismaClient } from "@/app/generated/prisma";
 import { pricingPlans } from "@/utils/constant";
+import { prisma } from "@/lib/prisma";
 
 const startOfToday = new Date();
 startOfToday.setHours(0, 0, 0, 0);
@@ -7,7 +7,6 @@ startOfToday.setHours(0, 0, 0, 0);
 const startOfTomorrow = new Date(startOfToday);
 startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
-const prisma = new PrismaClient();
 export async function getPriceId(email: string) {
   try {
     const user = await prisma.user.findUnique({
@@ -25,13 +24,17 @@ export async function getPriceId(email: string) {
   } catch (error) {
     console.error("Error fetching user price ID:", error);
     return null;
-  } finally {
-    await prisma.$disconnect();
   }
+  // Remove the finally block with $disconnect()
 }
 
 export async function hasReachedUploadLimit(userId: string, email: string) {
   try {
+    if (!userId) {
+      console.warn("No user ID provided.");
+      return true;
+    }
+
     const count = await prisma.quiz.count({
       where: {
         userId: userId,
@@ -53,9 +56,8 @@ export async function hasReachedUploadLimit(userId: string, email: string) {
   } catch (error) {
     console.error("Error checking upload limit:", error);
     return true;
-  } finally {
-    await prisma.$disconnect();
   }
+  // Remove the finally block with $disconnect()
 }
 
 export async function getStatus(email: string) {

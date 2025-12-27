@@ -1,8 +1,6 @@
 import Stripe from "stripe";
-import { PrismaClient } from "@/app/generated/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function handleCheckoutSessionCompleted({
   session,

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { FileText, Plus } from "lucide-react";
 import BgGradient from "@/components/layout/BgGradient";
 import QuizCard from "@/components/allQuizzes/QuizCard";
-import { PrismaClient } from "@/app/generated/prisma";
+// import { PrismaClient } from "@/app/generated/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 const page = async () => {
   const { userId } = await auth();
 

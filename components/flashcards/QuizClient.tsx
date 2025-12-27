@@ -289,7 +289,7 @@ export default function QuizClient({
           </Link>
         </div>
 
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500 drop-shadow-sm">
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-red-500 drop-shadow-sm">
           {title}
         </h1>
       </div>

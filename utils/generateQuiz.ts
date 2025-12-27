@@ -2,10 +2,8 @@
 
 import { generateQnAFromGemini } from "@/utils/geminiapi";
 import { getGroqChatCompletion } from "@/utils/groqapi";
-import { PrismaClient } from "@/app/generated/prisma";
+import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-
-const prisma = new PrismaClient();
 
 type QuizData = {
   question: string;

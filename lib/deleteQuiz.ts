@@ -1,8 +1,7 @@
 "use server";
 
-import { PrismaClient } from "@/app/generated/prisma";
-
-const prisma = new PrismaClient();
+// import { PrismaClient } from "@/app/generated/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function deleteQuiz(quizId: string) {
   try {
