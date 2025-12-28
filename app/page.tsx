@@ -8,7 +8,7 @@ import BgGradient from "@/components/layout/BgGradient";
 export default function Home() {
   console.log("sdf");
   return (
-    <div className="relative w-full">
+    <div className="relative w-full overflow-x-hidden">
       <BgGradient />
       <div className="flex flex-col">
         <HeroSection />

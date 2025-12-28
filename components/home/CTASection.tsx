@@ -20,8 +20,9 @@ const CTASection = () => {
         </div>
 
         <div className="text-center mb-16">
-          <h2 className="font-black text-3xl uppercase mb-4  text-black">
-            Ready to Save Hours of Learning?
+          <h2 className="font-black text-3xl  mb-4  text-black">
+            <span className="text-purple-600">Ready</span> to Save Hours of
+            Learning?
           </h2>
           <h3 className=" text-lg max-w-2xl mx-auto text-gray-400">
             Transform your documents into clear, fun and easy to learn with our

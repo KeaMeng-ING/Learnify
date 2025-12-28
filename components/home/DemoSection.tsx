@@ -6,7 +6,7 @@ import { sampleQuestions } from "@/utils/constant";
 
 export default function DemoSection() {
   return (
-    <section className="relative">
+    <section className="relative mb-50">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 transform-gpu overflow-hidden blur-3xl"
@@ -37,9 +37,10 @@ export default function DemoSection() {
           <div className="w-full">
             <QuizClient
               questions={sampleQuestions}
-              title="Learnify Demo Quiz"
+              title="Learnify Demo"
               minRead={2}
               id="demo-quiz"
+              demoMode={true}
             />
           </div>
         </div>

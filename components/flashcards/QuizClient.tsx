@@ -18,6 +18,7 @@ import BgGradient from "@/components/layout/BgGradient";
 import ProgressBar from "@/components/flashcards/ProgressBar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 type Quiz = {
   id: string;
@@ -39,11 +40,13 @@ export default function QuizClient({
   minRead,
   questions,
   id,
+  demoMode = false,
 }: {
   questions: Quiz[];
   title: string;
   minRead: number | null;
   id: string;
+  demoMode?: boolean;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -401,41 +404,48 @@ export default function QuizClient({
         </div>
 
         {/* Navigation Controls - 2x2 Grid */}
-        <div className="w-full lg:w-[20%] grid grid-cols-2 gap-4 lg:gap-5 h-[28rem] lg:h-[32rem]">
+        <div
+          className={cn(
+            "w-full lg:w-[20%] grid gap-3 lg:gap-4 xl:gap-5 h-[14rem] sm:h-[24rem] lg:h-[32rem]",
+            demoMode ? "grid-cols-1 grid-rows-4" : "grid-cols-2"
+          )}
+        >
           {/* Previous Button */}
           <button
             onClick={prevCard}
             disabled={currentIndex === 0}
-            className={`flex items-center justify-center w-full rounded-2xl transition-all duration-300 ${
+            className={`flex items-center justify-center w-full rounded-xl lg:rounded-2xl transition-all duration-300 ${
               currentIndex === 0
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-white hover:bg-purple-50 text-purple-600 hover:text-purple-700 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-purple-200"
             }`}
             title="Previous Card"
           >
-            <ChevronLeft size={32} />
+            <ChevronLeft size={24} className="lg:w-8 lg:h-8" />
           </button>
 
           {/* Action Button (I Know / Don't Know) */}
           {!isFlipped ? (
             <button
               onClick={markAsKnown}
-              className={`flex flex-col items-center justify-center gap-2 w-full rounded-2xl transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center gap-1 lg:gap-2 w-full rounded-xl lg:rounded-2xl transition-all duration-300 ${
                 currentIndex === cards.length - 1
                   ? "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
                   : "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
               }`}
             >
-              <Check size={28} />
-              <span className="font-semibold text-sm lg:text-base">I Know</span>
+              <Check size={20} className="lg:w-7 lg:h-7" />
+              <span className="font-semibold text-xs lg:text-sm xl:text-base">
+                I Know
+              </span>
             </button>
           ) : (
             <button
               onClick={markAsUnknown}
-              className="flex flex-col items-center justify-center gap-2 w-full rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              className="flex flex-col items-center justify-center gap-1 lg:gap-2 w-full rounded-xl lg:rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              <X size={28} />
-              <span className="font-semibold text-sm lg:text-base">
+              <X size={20} className="lg:w-7 lg:h-7" />
+              <span className="font-semibold text-xs lg:text-sm xl:text-base">
                 Don&#39;t Know
               </span>
             </button>
@@ -444,19 +454,19 @@ export default function QuizClient({
           {/* Shuffle Button */}
           <button
             onClick={shuffleCards}
-            className="flex items-center justify-center w-full rounded-2xl bg-purple-300 hover:bg-purple-400 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            className="flex items-center justify-center w-full rounded-xl lg:rounded-2xl bg-purple-300 hover:bg-purple-400 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             title="Shuffle Cards"
           >
-            <Shuffle size={28} />
+            <Shuffle size={20} className="lg:w-7 lg:h-7" />
           </button>
 
           {/* Reset Button */}
           <button
             onClick={resetCards}
-            className="flex items-center justify-center w-full rounded-2xl bg-purple-200 hover:bg-purple-300 text-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            className="flex items-center justify-center w-full rounded-xl lg:rounded-2xl bg-purple-200 hover:bg-purple-300 text-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             title="Reset Progress"
           >
-            <RotateCcw size={28} />
+            <RotateCcw size={20} className="lg:w-7 lg:h-7" />
           </button>
         </div>
       </div>
