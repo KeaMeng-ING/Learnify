@@ -7,7 +7,13 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-const UploadForm = ({ limit }: { limit: boolean }) => {
+const UploadForm = ({
+  limit,
+  redirectTo = "quiz",
+}: {
+  limit: boolean;
+  redirectTo?: "quiz" | "summary";
+}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (file: File) => {
@@ -34,10 +40,15 @@ const UploadForm = ({ limit }: { limit: boolean }) => {
           description: "Your document has been processed successfully! 🎉",
         });
 
-        const quiz = await generateQuiz(result.text);
-
-        // redirect to quiz flashcard
-        window.location.href = `/quiz/${quiz.id}`;
+        // Redirect based on the redirectTo prop
+        if (redirectTo === "summary") {
+          const summary = await generateSummary(result.text);
+          console.log("Generated Summary:", summary);
+          // window.location.href = `/summary/${summary.id}`;
+        } else {
+          const quiz = await generateQuiz(result.text);
+          window.location.href = `/quiz/${quiz.id}`;
+        }
       } else {
         toast.error(result.error || "Upload failed", {
           id: loadingToast,

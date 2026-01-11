@@ -45,6 +45,18 @@ model Quiz {
   @@map("quizzes")
 }
 
+model Summary {
+  id        String   @id @default(cuid())
+  title     String?
+  content   String   @db.Text
+  minRead   Int?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("summaries")
+}
+
 model Question {
   id       String @id @default(cuid())
   question String

@@ -1,7 +1,7 @@
 "use server";
 
 import { generateQnAFromGemini } from "@/utils/geminiapi";
-import { getGroqChatCompletion } from "@/utils/groqapi";
+import { getGroqQuizCreation } from "@/utils/groqapi";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
@@ -69,7 +69,7 @@ export default async function generateQuiz(text: string) {
   let quiz;
 
   try {
-    quiz = await getGroqChatCompletion(text);
+    quiz = await getGroqQuizCreation(text);
   } catch (error) {
     // Call Gemini Code
     if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
