@@ -1,140 +1,140 @@
 "use server";
 
-import { generateQnAFromGemini } from "@/utils/geminiapi";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import getGroqSummaryCreation from "@/utils/groqapi";
 
-type QuizData = {
-  question: string;
-  answer: string;
+type SlideData = {
+  heading: string;
+  content: string;
 };
 
-type ParsedQuiz = {
+type ParsedSummary = {
   title: string | null;
-  summary: string | null;
-  minuteRead: number | null;
-  questions: QuizData[];
+  overview: string | null;
+  slides: SlideData[];
+  keyTakeaway: string | null;
 };
 
-// function parseQuizText(quizText: string): ParsedQuiz {
-//   const lines = quizText.split("\n").filter((line) => line.trim());
-//   const questions: QuizData[] = [];
+function parseSummaryText(summaryText: string): ParsedSummary {
+  const lines = summaryText.split("\n").filter((line) => line.trim());
+  const slides: SlideData[] = [];
 
-//   let currentQuestion = "";
-//   let currentAnswer = "";
-//   let title: string | null = null;
-//   let summary: string | null = null;
-//   let minuteRead: number | null = null;
+  let title: string | null = null;
+  let overview: string | null = null;
+  let keyTakeaway: string | null = null;
+  let currentSlideHeading = "";
+  let currentSlideContent: string[] = [];
 
-//   for (const line of lines) {
-//     if (line.startsWith("Title:")) {
-//       const titleMatch = line.match(/Title:\s*(.+)/);
-//       if (titleMatch) {
-//         title = titleMatch[1];
-//       }
-//     } else if (line.startsWith("Summary:")) {
-//       const summaryMatch = line.match(/Summary:\s*(.+)/);
-//       if (summaryMatch) {
-//         summary = summaryMatch[1];
-//       }
-//     } else if (line.startsWith("Minute Read:")) {
-//       const minuteReadMatch = line.match(/Minute Read:\s*(\d+)/);
-//       if (minuteReadMatch) {
-//         minuteRead = parseInt(minuteReadMatch[1], 10);
-//       }
-//     } else if (line.startsWith("Question")) {
-//       const questionMatch = line.match(/Question \d+: (.+)/);
-//       if (questionMatch) {
-//         currentQuestion = questionMatch[1];
-//       }
-//     } else if (line.startsWith("Answer")) {
-//       const answerMatch = line.match(/Answer \d+: (.+)/);
-//       if (answerMatch) {
-//         currentAnswer = answerMatch[1];
-//         if (currentQuestion) {
-//           questions.push({
-//             question: currentQuestion,
-//             answer: currentAnswer,
-//           });
-//         }
-//       }
-//     }
-//   }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
 
-//   return { title, summary, questions, minuteRead };
-// }
+    if (line.startsWith("Title:")) {
+      const titleMatch = line.match(/Title:\s*(.+)/);
+      if (titleMatch) {
+        title = titleMatch[1];
+      }
+    } else if (line.startsWith("Overview:")) {
+      const overviewMatch = line.match(/Overview:\s*(.+)/);
+      if (overviewMatch) {
+        overview = overviewMatch[1];
+      }
+    } else if (line.startsWith("Slide")) {
+      // Save previous slide if exists
+      if (currentSlideHeading && currentSlideContent.length > 0) {
+        slides.push({
+          heading: currentSlideHeading,
+          content: currentSlideContent.join("\n"),
+        });
+        currentSlideContent = [];
+      }
+
+      // Extract new slide heading
+      const slideMatch = line.match(/Slide \d+:\s*(.+)/);
+      if (slideMatch) {
+        currentSlideHeading = slideMatch[1];
+      }
+    } else if (line.startsWith("Key Takeaway:")) {
+      // Save last slide before key takeaway
+      if (currentSlideHeading && currentSlideContent.length > 0) {
+        slides.push({
+          heading: currentSlideHeading,
+          content: currentSlideContent.join("\n"),
+        });
+        currentSlideContent = [];
+        currentSlideHeading = "";
+      }
+
+      const takeawayMatch = line.match(/Key Takeaway:\s*(.+)/);
+      if (takeawayMatch) {
+        keyTakeaway = takeawayMatch[1];
+      }
+    } else if (currentSlideHeading) {
+      // Add content to current slide (bullet points or sentences)
+      if (line.startsWith("*") || line.startsWith("-") || line.length > 0) {
+        currentSlideContent.push(line);
+      }
+    }
+  }
+
+  // Save last slide if not saved
+  if (currentSlideHeading && currentSlideContent.length > 0) {
+    slides.push({
+      heading: currentSlideHeading,
+      content: currentSlideContent.join("\n"),
+    });
+  }
+
+  return { title, overview, slides, keyTakeaway };
+}
 
 export default async function generateSummary(text: string) {
-  let summary;
-  console.log("Starting summary generation process");
-  try {
-    console.log("Calling Groq API for summary generation");
-    summary = await getGroqSummaryCreation(text);
-    console.log("Groq Summary Content:", summary);
-  } catch (error) {
-    console.log("Groq API failed:", error);
-    // // Call Gemini Code
-    // if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
-    //   try {
-    //     summary = await generateQnAFromGemini(text);
-    //   } catch (geminiError) {
-    //     console.error(
-    //       "Gemini API failed after OpenAI quote exceeded",
-    //       geminiError
-    //     );
-    //     throw new Error(
-    //       "Failed to generate summary with available AI providers"
-    //     );
-    //   }
-    // } else {
-    //   // Re-throw other errors
-    //   throw error;
-    // }
-  }
-
-  if (!summary) {
-    throw new Error("Failed to generate summary content");
-  }
-
   // Get the current user
   const { userId } = await auth();
   if (!userId) {
     throw new Error("User not authenticated");
   }
 
+  let summary;
+
+  try {
+    summary = await getGroqSummaryCreation(text);
+  } catch (error) {
+    throw new Error("Failed to generate summary content");
+  }
+
+  if (!summary) {
+    throw new Error("Failed to generate summary content");
+  }
+
   // Parse the quiz text into structured data
-  //   const quizData = parseQuizText(summary);
-  //   console.log("Parsed Summary Data:", quizData);
-  //   if (!quizData.questions.length) {
-  //     throw new Error("No summary generated from the provided text");
-  //   }
+  const summaryData = parseSummaryText(summary);
+  console.log("Parsed Summary Data:", summaryData);
+  if (!summaryData.slides.length) {
+    throw new Error("No summary generated from the provided text");
+  }
 
-  //   try {
-  //     // Save to database
-  //     const savedSummary = await prisma.summary.create({
-  //       data: {
-  //         userId,
-  //         title: quizData.title || "Untitled Summary",
-  //         summary: quizData.summary,
-  //         minRead: quizData.minuteRead || null,
-  //         questions: {
-  //           create: quizData.questions.map((q) => ({
-  //             question: q.question,
-  //             answer: q.answer,
-  //           })),
-  //         },
-  //       },
-  //       include: {
-  //         questions: true,
-  //       },
-  //     });
+  try {
+    // Combine slides content
+    const fullContent = summaryData.slides
+      .map((slide) => `${slide.heading}\n${slide.content}`)
+      .join("\n\n");
 
-  //     return savedQuiz;
-  //   } catch (dbError) {
-  //     console.error("Database save error:", dbError);
-  //     throw new Error("Failed to save quiz to database");
-  //   } finally {
-  //     await prisma.$disconnect();
-  //   }
+    // Save to database
+    const savedSummary = await prisma.summary.create({
+      data: {
+        userId,
+        title: summaryData.title || "Untitled Summary",
+        content: fullContent,
+        minRead: null, // TODO: Calculate reading time if needed
+      },
+    });
+
+    return savedSummary;
+  } catch (dbError) {
+    console.error("Database save error:", dbError);
+    throw new Error("Failed to save summary to database");
+  } finally {
+    await prisma.$disconnect();
+  }
 }

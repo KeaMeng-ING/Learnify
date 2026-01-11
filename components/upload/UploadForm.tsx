@@ -2,6 +2,7 @@
 
 import UploadInput from "@/components/upload/UploadInput";
 import generateQuiz from "@/utils/generateQuiz";
+import generateSummary from "@/utils/generateSummary";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -44,7 +45,7 @@ const UploadForm = ({
         if (redirectTo === "summary") {
           const summary = await generateSummary(result.text);
           console.log("Generated Summary:", summary);
-          // window.location.href = `/summary/${summary.id}`;
+          window.location.href = `/summary/${summary.id}`;
         } else {
           const quiz = await generateQuiz(result.text);
           window.location.href = `/quiz/${quiz.id}`;

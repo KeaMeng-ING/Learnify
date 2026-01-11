@@ -11,20 +11,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const flashcards = await prisma.quiz.findFirst({
+    const summary = await prisma.summary.findFirst({
       where: { id },
-      include: {
-        questions: true,
-      },
     });
 
-    if (!flashcards) {
-      return new NextResponse("Quiz not found", { status: 404 });
+    if (!summary) {
+      return new NextResponse("Summary not found", { status: 404 });
     }
 
-    return NextResponse.json(flashcards);
+    return NextResponse.json(summary);
   } catch (error) {
-    console.error("Error fetching flashcards:", error);
+    console.error("Error fetching summary:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

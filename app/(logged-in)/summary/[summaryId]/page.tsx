@@ -1,14 +1,21 @@
-export default async function QuizPage({
+import SummaryClient from "@/components/flashcards/SummaryClient";
+
+export default async function SummaryPage({
   params,
 }: {
   params: Promise<{ summaryId: string }>;
 }) {
   const { summaryId } = await params;
-  const res = await fetch(
-    `${process.env.DOMAIN}/api/summaries?id=${summaryId}`
-  );
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/summaries?id=${summaryId}`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch summary");
+  }
+
   const data = await res.json();
   console.log(data);
 
-  return <h1>{summaryId}</h1>;
+  return <SummaryClient />;
 }

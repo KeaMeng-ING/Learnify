@@ -1,6 +1,5 @@
 "use server";
 
-import { generateQnAFromGemini } from "@/utils/geminiapi";
 import { getGroqQuizCreation } from "@/utils/groqapi";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
@@ -71,23 +70,7 @@ export default async function generateQuiz(text: string) {
   try {
     quiz = await getGroqQuizCreation(text);
   } catch (error) {
-    // Call Gemini Code
-    if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
-      try {
-        quiz = await generateQnAFromGemini(text);
-      } catch (geminiError) {
-        console.error(
-          "Gemini API failed after OpenAI quote exceeded",
-          geminiError
-        );
-        throw new Error(
-          "Failed to generate summary with available AI providers"
-        );
-      }
-    } else {
-      // Re-throw other errors
-      throw error;
-    }
+    throw new Error("Error generating quiz content: " + error);
   }
   console.log("Generated Quiz Content:", quiz);
 
