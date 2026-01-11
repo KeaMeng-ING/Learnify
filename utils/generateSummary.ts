@@ -14,6 +14,7 @@ type ParsedSummary = {
   overview: string | null;
   slides: SlideData[];
   keyTakeaway: string | null;
+  minuteRead: number | null;
 };
 
 function parseSummaryText(summaryText: string): ParsedSummary {
@@ -23,6 +24,7 @@ function parseSummaryText(summaryText: string): ParsedSummary {
   let title: string | null = null;
   let overview: string | null = null;
   let keyTakeaway: string | null = null;
+  let minuteRead: number | null = null;
   let currentSlideHeading = "";
   let currentSlideContent: string[] = [];
 
@@ -33,6 +35,11 @@ function parseSummaryText(summaryText: string): ParsedSummary {
       const titleMatch = line.match(/Title:\s*(.+)/);
       if (titleMatch) {
         title = titleMatch[1];
+      }
+    } else if (line.startsWith("Minute Read:")) {
+      const minuteReadMatch = line.match(/Minute Read:\s*(\d+)/);
+      if (minuteReadMatch) {
+        minuteRead = parseInt(minuteReadMatch[1], 10);
       }
     } else if (line.startsWith("Overview:")) {
       const overviewMatch = line.match(/Overview:\s*(.+)/);
@@ -85,7 +92,7 @@ function parseSummaryText(summaryText: string): ParsedSummary {
     });
   }
 
-  return { title, overview, slides, keyTakeaway };
+  return { title, overview, slides, keyTakeaway, minuteRead };
 }
 
 export default async function generateSummary(text: string) {
@@ -115,18 +122,20 @@ export default async function generateSummary(text: string) {
   }
 
   try {
-    // Combine slides content
-    const fullContent = summaryData.slides
-      .map((slide) => `${slide.heading}\n${slide.content}`)
-      .join("\n\n");
-
-    // Save to database
+    // Save to database with slides relation
     const savedSummary = await prisma.summary.create({
       data: {
         userId,
         title: summaryData.title || "Untitled Summary",
-        content: fullContent,
-        minRead: null, // TODO: Calculate reading time if needed
+        overview: summaryData.overview,
+        keyTakeaway: summaryData.keyTakeaway,
+        minRead: summaryData.minuteRead,
+        slides: {
+          create: summaryData.slides.map((slide) => ({
+            heading: slide.heading,
+            content: slide.content,
+          })),
+        },
       },
     });
 

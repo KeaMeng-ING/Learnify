@@ -44,7 +44,6 @@ const UploadForm = ({
         // Redirect based on the redirectTo prop
         if (redirectTo === "summary") {
           const summary = await generateSummary(result.text);
-          console.log("Generated Summary:", summary);
           window.location.href = `/summary/${summary.id}`;
         } else {
           const quiz = await generateQuiz(result.text);

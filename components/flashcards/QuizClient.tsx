@@ -283,7 +283,7 @@ export default function QuizClient({
           <Link href="/dashboard" className="-translate-y-1.5">
             <Button
               variant="secondary"
-              className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300"
+              className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300 rounded-full"
             >
               <ChevronLeft size={16} />
               Dashboard

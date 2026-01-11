@@ -36,6 +36,8 @@ Return the result in exactly this format:
 
 Title: [lesson title]
 
+Minute Read: [estimated time in whole minutes to read the summary]
+
 Overview: [1-2 sentences explaining what viewers will learn, with emoji]
 
 Slide 1: [heading]

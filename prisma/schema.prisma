@@ -46,15 +46,29 @@ model Quiz {
 }
 
 model Summary {
-  id        String   @id @default(cuid())
-  title     String?
-  content   String   @db.Text
-  minRead   Int?
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String?
+  overview    String?
+  keyTakeaway String?  @map("key_takeaway")
+  minRead     Int?     @map("min_read")
+  userId      String   @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  slides Slide[]
 
   @@map("summaries")
+}
+
+model Slide {
+  id        String @id @default(cuid())
+  heading   String
+  content   String @db.Text
+  summaryId String @map("summary_id")
+
+  summary Summary @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+
+  @@map("slides")
 }
 
 model Question {
