@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function NavLink({
   href,
@@ -14,7 +14,22 @@ export default function NavLink({
   className?: string;
 }) {
   const pathname = usePathname();
-  const isActive = pathname === href || pathname.startsWith(href);
+  const searchParams = useSearchParams();
+
+  // Parse the href to extract pathname and query params
+  const [hrefPath, hrefQuery] = href.split("?");
+  const pathMatches = pathname === hrefPath;
+
+  // Check if query params match (if they exist in href)
+  let queryMatches = true;
+  if (hrefQuery) {
+    const hrefParams = new URLSearchParams(hrefQuery);
+    queryMatches = Array.from(hrefParams.entries()).every(
+      ([key, value]) => searchParams.get(key) === value
+    );
+  }
+
+  const isActive = pathMatches && queryMatches;
 
   return (
     <Link
@@ -22,7 +37,7 @@ export default function NavLink({
       className={cn(
         "transition-colors text-sm duration-200 text-gray-600 hover:text-purple-600",
         className,
-        isActive && "text-purple-600 "
+        isActive && "text-purple-600"
       )}
     >
       {children}

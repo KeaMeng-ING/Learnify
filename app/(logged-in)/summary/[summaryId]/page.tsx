@@ -13,5 +13,13 @@ export default async function SummaryPage({
   }
   const data = await res.json();
 
-  return <SummaryClient title={data.title} minRead={data.minRead} />;
+  return (
+    <SummaryClient
+      title={data.title}
+      minRead={data.minRead}
+      slides={data.slides}
+      overview={data.overview}
+      keyTakeaway={data.keyTakeaway}
+    />
+  );
 }

@@ -13,6 +13,9 @@ export async function GET(request: NextRequest) {
   try {
     const summary = await prisma.summary.findFirst({
       where: { id },
+      include: {
+        slides: true,
+      },
     });
 
     if (!summary) {

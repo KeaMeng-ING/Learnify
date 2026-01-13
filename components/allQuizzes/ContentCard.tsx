@@ -21,7 +21,7 @@ type Quiz = {
   userId: string;
 };
 
-export default function QuizCard({ quiz }: { quiz: Quiz }) {
+export default function ContentCard({ quiz }: { quiz: Quiz }) {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -71,7 +71,7 @@ export default function QuizCard({ quiz }: { quiz: Quiz }) {
             </div>
 
             <div className="line-clamp-2 text-gray-500 px-4 text-left h-12">
-              {quiz.summary}
+              {quiz.summary || quiz.overview}
             </div>
 
             <div className="flex justify-start p-4">

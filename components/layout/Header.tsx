@@ -26,15 +26,14 @@ export default function Header() {
           <NavLink href="/#pricing">Pricing</NavLink>
         </SignedOut>
         <SignedIn>
-          <NavLink href="/dashboard">Your Quizzes</NavLink>
-          <NavLink href="/learn/summary">Summarize PDF</NavLink>
+          <NavLink href="/dashboard?feature=quiz">Your Quizzes</NavLink>
+          <NavLink href="/dashboard?feature=summary">Your Summaries</NavLink>
         </SignedIn>
       </div>
 
       <div className="flex lg:justify-end lg:flex-1">
         <SignedIn>
           <div className="flex gap-2 items-center">
-            <NavLink href="/upload">Upload a PDF</NavLink>
             <PlanBadge />
             <SignedIn>
               <UserButton />
