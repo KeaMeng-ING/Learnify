@@ -19,9 +19,16 @@ type Quiz = {
   createdAt: Date | string;
   updatedAt: Date | string;
   userId: string;
+  overview: string | null;
 };
 
-export default function ContentCard({ quiz }: { quiz: Quiz }) {
+export default function ContentCard({
+  item,
+  type,
+}: {
+  item: Quiz;
+  type: "quiz" | "summary";
+}) {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -33,7 +40,7 @@ export default function ContentCard({ quiz }: { quiz: Quiz }) {
   function handleConfirm() {
     setShowConfirm(false);
     startTransition(async () => {
-      await deleteQuiz(quiz.id);
+      await deleteQuiz(item.id);
       router.refresh();
     });
   }
@@ -53,17 +60,20 @@ export default function ContentCard({ quiz }: { quiz: Quiz }) {
             <Trash2 size={18} className="text-gray-400" />
           </div>
 
-          <Link href={`/quiz/${quiz.id}`} className="flex flex-col px-2">
+          <Link
+            href={`/${type}/${item.id}`}
+            className="flex flex-col px-2 py-3"
+          >
             <div className="flex p-4 pb-2 sm:p-5 sm:pb-2">
               <div className="pr-3 translate-y-2">
                 <FileDiff size={26} className="text-purple-500" />
               </div>
               <div className="flex flex-col text-left justify-start w-full">
                 <h3 className="text-base xl:text-lg font-semibold text-gray-900 truncate w-4/5">
-                  {quiz.title}
+                  {item.title}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  {formatDistanceToNow(new Date(quiz.createdAt), {
+                  {formatDistanceToNow(new Date(item.createdAt), {
                     addSuffix: true,
                   })}
                 </p>
@@ -71,11 +81,11 @@ export default function ContentCard({ quiz }: { quiz: Quiz }) {
             </div>
 
             <div className="line-clamp-2 text-gray-500 px-4 text-left h-12">
-              {quiz.summary || quiz.overview}
+              {item.summary || item.overview}
             </div>
 
             <div className="flex justify-start p-4">
-              {quiz.complete ? (
+              {item.complete ? (
                 <Badge className="bg-[#e6ffe6] text-[#339933] shadow-md">
                   Completed
                 </Badge>

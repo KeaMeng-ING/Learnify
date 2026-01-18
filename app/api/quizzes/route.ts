@@ -7,7 +7,10 @@ export async function GET(request: NextRequest) {
   const id = searchParams.get("id");
 
   if (!id) {
-    return new NextResponse("Missing id parameter", { status: 400 });
+    return NextResponse.json(
+      { error: "Missing id parameter" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -19,12 +22,15 @@ export async function GET(request: NextRequest) {
     });
 
     if (!flashcards) {
-      return new NextResponse("Quiz not found", { status: 404 });
+      return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
 
     return NextResponse.json(flashcards);
   } catch (error) {
     console.error("Error fetching flashcards:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

@@ -20,6 +20,7 @@ export default async function SummaryPage({
       slides={data.slides}
       overview={data.overview}
       keyTakeaway={data.keyTakeaway}
+      summaryId={summaryId}
     />
   );
 }

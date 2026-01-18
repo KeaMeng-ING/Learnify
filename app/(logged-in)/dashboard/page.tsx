@@ -37,6 +37,8 @@ const page = async ({
     });
   }
 
+  console.log("card", card);
+
   return (
     <div className="flex flex-col items-center justify-center gap-6 text-center w-full sm:px-14">
       <BgGradient className="from-purple-500 via-cyan-500 to-blue-500" />
@@ -85,7 +87,11 @@ const page = async ({
           </div>
         )}
         {card.map((item) => (
-          <ContentCard quiz={item} key={item.id} />
+          <ContentCard
+            item={item}
+            key={item.id}
+            type={isQuiz ? "quiz" : "summary"}
+          />
         ))}
       </div>
     </div>

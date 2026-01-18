@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import {
   ChevronLeft,
+  ChevronRight,
   RotateCcw,
-  Shuffle,
   BookOpen,
   Sparkles,
   Check,
@@ -12,13 +12,10 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
-import Confetti from "react-confetti";
 import { Button } from "@/components/ui/button";
-import BgGradient from "@/components/layout/BgGradient";
-import ProgressBar from "@/components/flashcards/ProgressBar";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
+import BgGradient from "@/components/layout/BgGradient";
 
 type Quiz = {
   id: string;
@@ -51,12 +48,9 @@ export default function QuizClient({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cards, setCards] = useState<Quiz[]>(questions);
-
-  const [isShuffling, setIsShuffling] = useState(false);
   const [slideDirection, setSlideDirection] = useState("");
   const [knownCards, setKnownCards] = useState(new Set<string>());
   const [unknownCards, setUnknownCards] = useState(new Set<string>());
-  const [showStats, setShowStats] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasCelebrated, setHasCelebrated] = useState(false);
@@ -64,20 +58,16 @@ export default function QuizClient({
 
   const STORAGE_KEY = `quiz_progress_${id}`;
 
-  // Load progress from localStorage on component mount
   useEffect(() => {
     const loadProgress = () => {
       try {
         const savedProgress = localStorage.getItem(STORAGE_KEY);
         if (savedProgress) {
           const progress: QuizProgress = JSON.parse(savedProgress);
-
-          // Check if progress is not too old (optional - remove if you want indefinite storage)
           const daysSinceUpdate =
             (Date.now() - progress.lastUpdated) / (1000 * 60 * 60 * 24);
 
           if (daysSinceUpdate < 30) {
-            // Keep progress for 30 days
             setCurrentIndex(progress.currentIndex);
             setKnownCards(new Set(progress.knownCards));
             setUnknownCards(new Set(progress.unknownCards));
@@ -94,9 +84,8 @@ export default function QuizClient({
     loadProgress();
   }, [id, STORAGE_KEY]);
 
-  // Save progress to localStorage whenever relevant state changes
   useEffect(() => {
-    if (!isLoaded) return; // Don't save during initial load
+    if (!isLoaded) return;
 
     const saveProgress = () => {
       try {
@@ -124,7 +113,6 @@ export default function QuizClient({
     STORAGE_KEY,
   ]);
 
-  // Clear progress from localStorage
   const clearProgress = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -135,7 +123,6 @@ export default function QuizClient({
 
   const flipCard = () => setIsFlipped(!isFlipped);
   const currentCard = cards[currentIndex];
-  if (!currentCard) return null;
 
   const markAsKnown = () => {
     const cardId = currentCard.id;
@@ -173,11 +160,6 @@ export default function QuizClient({
           setShowConfetti(true);
           setHasCelebrated(true);
           setTimeout(() => setShowConfetti(false), 5000);
-          fetch("/api/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-          });
         }
       }, 200);
     } else {
@@ -209,38 +191,50 @@ export default function QuizClient({
     setUnknownCards(new Set());
     setShowCelebration(false);
     setHasCelebrated(false);
-    clearProgress(); // Clear saved progress
+    clearProgress();
   };
 
-  const shuffleCards = () => {
-    setIsShuffling(true);
-    setTimeout(() => {
-      const shuffled = [...cards].sort(() => Math.random() - 0.5);
-      setCards(shuffled);
-      setCurrentIndex(0);
-      setIsFlipped(false);
-      setIsShuffling(false);
-      // Clear progress when shuffling since card order changed
-      clearProgress();
-      setKnownCards(new Set());
-      setUnknownCards(new Set());
-      setHasCelebrated(false);
-    }, 600);
-  };
-
-  const progress = ((currentIndex + 1) / cards.length) * 100;
   const knownCount = knownCards.size;
   const unknownCount = unknownCards.size;
-  const totalAnswered = knownCount + unknownCount;
+  const isCurrentCardKnown = knownCards.has(currentCard?.id);
+  const isCurrentCardUnknown = unknownCards.has(currentCard?.id);
 
-  const isCurrentCardKnown = knownCards.has(currentCard.id);
-  const isCurrentCardUnknown = unknownCards.has(currentCard.id);
+  // Mark quiz as complete when all cards are answered
+  useEffect(() => {
+    if (!isLoaded || demoMode) return;
 
-  // Show loading state while progress is being loaded
+    const allAnswered = cards.every(
+      (card) => knownCards.has(card.id) || unknownCards.has(card.id),
+    );
+
+    if (allAnswered && cards.length > 0) {
+      markQuizAsComplete();
+    }
+  }, [knownCards, unknownCards, isLoaded, demoMode, cards]);
+
+  const markQuizAsComplete = async () => {
+    try {
+      const response = await fetch("/api/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, type: "quiz" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark quiz as complete");
+      }
+
+      console.log("Quiz marked as complete");
+    } catch (error) {
+      console.error("Error marking quiz as complete:", error);
+    }
+  };
+
   if (!isLoaded) {
     return (
       <div className="h-screen relative overflow-hidden flex items-center justify-center">
-        <BgGradient />
         <div className="relative z-10 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your progress...</p>
@@ -249,12 +243,16 @@ export default function QuizClient({
     );
   }
 
+  if (!currentCard) return null;
+
   return (
-    <div className="h-[calc(100vh-64px)] relative  w-full flex flex-col">
-      {/* Background decoration */}
-      {id !== "demo-quiz" && <BgGradient />}
-      <div className="container mx-auto px-2 lg:px-8 flex flex-col justify-start py-8">
-        <div className="flex flex-wrap justify-between items-center mb-4 w-full">
+    <div className="h-screen w-full overflow-hidden flex flex-col ">
+      {/* <BgGradient /> */}
+      {!demoMode && (
+        <BgGradient className="from-purple-500 via-cyan-500 to-blue-500" />
+      )}
+      <div className="container mx-auto px-2 lg:px-8 flex flex-col justify-start py-4 flex-shrink-0">
+        <div className="flex flex-wrap justify-between items-center mb-2 w-full">
           <div className="flex flex-wrap items-center gap-4 mb-4 sm:mb-0">
             <Badge
               variant="outline"
@@ -279,195 +277,168 @@ export default function QuizClient({
               <p className="text-sm text-gray-500">{minRead} min quiz</p>
             </div>
           </div>
-
-          <Link href="/dashboard" className="-translate-y-1.5">
-            <Button
-              variant="secondary"
-              className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300 rounded-full"
-            >
-              <ChevronLeft size={16} />
-              Dashboard
-            </Button>
-          </Link>
         </div>
 
         <div className="flex flex-col lg:flex-row w-full gap-3 lg:gap-4 items-start">
-          <h1 className="w-full lg:w-[30%] text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-600 to-red-600 drop-shadow-sm mt-4">
+          <h1 className="w-full text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-600 to-red-600 drop-shadow-sm">
             {title}
           </h1>
-
-          <div className="w-full lg:flex-1">
-            <ProgressBar
-              currentIndex={currentIndex}
-              total={cards.length}
-              progress={progress}
-              knownCount={knownCount}
-              unknownCount={unknownCount}
-              totalAnswered={totalAnswered}
-              showStats={showStats}
-              toggleStats={() => setShowStats(!showStats)}
-            />
-          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-2 lg:px-8 flex flex-col lg:flex-row items-start lg:items-stretch gap-6">
-        <div className="w-full lg:w-[80%]">
-          {/* Flashcard Container */}
-          <div className="relative w-full perspective-1000 mb-8">
-            <div
-              className={`relative w-full h-[28rem] lg:h-[32rem] transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer ${
-                isFlipped ? "rotate-y-180" : ""
-              } ${slideDirection} ${isShuffling ? "is-shuffling" : ""}`}
-              onClick={flipCard}
-            >
-              {/* Front of card (Question) */}
-              <div className="absolute inset-0 w-full h-full backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200/50 ">
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-pink-400/10 to-purple-400/10 rounded-full translate-y-12 -translate-x-12" />
+      <div className="relative z-10 flex-1 flex flex-col overflow-hidden min-h-0">
+        <div className="w-full max-w-3xl mx-auto px-4 h-full flex items-center py-4">
+          <div className="bg-white/60 backdrop-blur-lg rounded-3xl shadow-xl border border-gray-200/50 p-6 lg:p-8 w-full h-full max-h-[calc(100vh-200px)]">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 lg:p-8 border border-purple-500/20 h-full flex flex-col mx-auto max-w-[500px]">
+              {/* Progress Bar */}
+              <div className="mb-6 flex-shrink-0">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  {Array.from({ length: cards.length }).map((_, index) => {
+                    const cardId = cards[index].id;
+                    const isKnown = knownCards.has(cardId);
+                    const isUnknown = unknownCards.has(cardId);
 
-                {/* Card status indicator */}
-                {(isCurrentCardKnown || isCurrentCardUnknown) && (
-                  <div className="absolute top-4 right-4">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        isCurrentCardKnown ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    >
-                      {isCurrentCardKnown ? (
-                        <Check size={14} className="text-white" />
-                      ) : (
-                        <X size={14} className="text-white" />
-                      )}
+                    return (
+                      <div
+                        key={index}
+                        className={cn(
+                          "h-2 flex-1 rounded-full transition-all duration-300",
+                          isKnown && "bg-green-500",
+                          isUnknown && "bg-red-500",
+                          !isKnown &&
+                            !isUnknown &&
+                            index <= currentIndex &&
+                            "bg-gray-400",
+                          !isKnown &&
+                            !isUnknown &&
+                            index > currentIndex &&
+                            "bg-gray-200",
+                        )}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                  <span>Known: {knownCount}</span>
+                  <span>Unknown: {unknownCount}</span>
+                </div>
+              </div>
+
+              {/* Card Content */}
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <div
+                  className={`relative w-full h-full transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer ${
+                    isFlipped ? "rotate-y-180" : ""
+                  }`}
+                  onClick={flipCard}
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  {/* Front - Question */}
+                  <div
+                    className="absolute inset-0 w-full h-full backface-hidden"
+                    style={{ backfaceVisibility: "hidden" }}
+                  >
+                    <div className="h-full flex flex-col justify-center items-center text-center px-4">
+                      <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                        Question
+                      </h2>
+                      <p className="text-gray-700 text-lg leading-relaxed">
+                        {currentCard.question}
+                      </p>
+                      <div className="mt-6">
+                        <div className="flex items-center gap-2 text-gray-500 text-sm">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                          <span>Click to reveal answer</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                <div className="relative p-8 h-full flex flex-col justify-center">
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-6">
-                      <BookOpen className="text-white" size={24} />
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-6">
-                      Question
-                    </h2>
-                    <p className="text-gray-700 text-xl leading-relaxed font-medium max-w-2xl mx-auto">
-                      {currentCard.question}
-                    </p>
-                  </div>
-                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                      <span>Click to reveal answer</span>
+                  {/* Back - Answer */}
+                  <div
+                    className="absolute inset-0 w-full h-full backface-hidden"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: "rotateY(180deg)",
+                    }}
+                  >
+                    <div className="h-full flex flex-col justify-center items-center text-center px-4">
+                      <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                        Answer
+                      </h2>
+                      <p className="text-gray-700 text-lg leading-relaxed">
+                        {currentCard.answer}
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Back of card (Answer) */}
-              <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-3xl bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200/50 ">
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-green-400/10 rounded-full translate-y-12 -translate-x-12" />
+              {/* Navigation and Actions */}
+              <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-gray-200 flex-shrink-0">
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center">
+                  <Button
+                    onClick={prevCard}
+                    disabled={currentIndex === 0}
+                    className={cn(
+                      "flex items-center justify-center transition-all duration-300 rounded-full w-10 h-10 p-0",
+                      currentIndex === 0
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl",
+                    )}
+                  >
+                    <ChevronLeft size={20} />
+                  </Button>
 
-                {/* Card status indicator */}
-                {(isCurrentCardKnown || isCurrentCardUnknown) && (
-                  <div className="absolute top-4 right-4">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        isCurrentCardKnown ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    >
-                      {isCurrentCardKnown ? (
-                        <Check size={14} className="text-white" />
-                      ) : (
-                        <X size={14} className="text-white" />
-                      )}
-                    </div>
+                  <div className="text-sm text-gray-500">
+                    Card {currentIndex + 1} of {cards.length}
                   </div>
-                )}
 
-                <div className="relative p-8 h-full flex flex-col justify-center">
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl mb-6">
-                      <Sparkles className="text-white" size={24} />
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-6">
-                      Answer
-                    </h2>
-                    <p className="text-gray-700 text-xl leading-relaxed font-medium max-w-2xl mx-auto">
-                      {currentCard.answer}
-                    </p>
-                  </div>
+                  <Button
+                    onClick={nextCard}
+                    disabled={currentIndex === cards.length - 1}
+                    className={cn(
+                      "flex items-center justify-center transition-all duration-300 rounded-full w-10 h-10 p-0",
+                      currentIndex === cards.length - 1
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl",
+                    )}
+                  >
+                    <ChevronRight size={20} />
+                  </Button>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-3 gap-3">
+                  <Button
+                    onClick={markAsKnown}
+                    className="bg-purple-500 hover:bg-purple-600 text-white flex flex-col items-center justify-center gap-1 h-16 rounded-xl"
+                  >
+                    <Check size={20} />
+                    <span className="text-xs">Know</span>
+                  </Button>
+
+                  <Button
+                    onClick={markAsUnknown}
+                    className="bg-purple-100 hover:bg-purple-300 text-purple-700 flex flex-col items-center justify-center gap-1 h-16 rounded-xl"
+                  >
+                    <X size={20} />
+                    <span className="text-xs">Don't</span>
+                  </Button>
+
+                  <Button
+                    onClick={resetCards}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 flex flex-col items-center justify-center gap-1 h-16 rounded-xl"
+                  >
+                    <RotateCcw size={20} />
+                    <span className="text-xs">Reset</span>
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Navigation Controls - 2x2 Grid */}
-        <div
-          className={cn(
-            "w-full lg:w-[20%] grid gap-3 lg:gap-4 xl:gap-5 h-[14rem] sm:h-[24rem] lg:h-[32rem]",
-            demoMode ? "grid-cols-1 grid-rows-4" : "grid-cols-2"
-          )}
-        >
-          {/* Previous Button */}
-          <button
-            onClick={prevCard}
-            disabled={currentIndex === 0}
-            className={`flex items-center justify-center w-full rounded-xl lg:rounded-2xl transition-all duration-300 ${
-              currentIndex === 0
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-purple-50 text-purple-600 hover:text-purple-700 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-purple-200"
-            }`}
-            title="Previous Card"
-          >
-            <ChevronLeft size={24} className="lg:w-8 lg:h-8" />
-          </button>
-
-          {/* Action Button (I Know / Don't Know) */}
-          {!isFlipped ? (
-            <button
-              onClick={markAsKnown}
-              className={`flex flex-col items-center justify-center gap-1 lg:gap-2 w-full rounded-xl lg:rounded-2xl transition-all duration-300 ${
-                currentIndex === cards.length - 1
-                  ? "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
-                  : "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
-              }`}
-            >
-              <Check size={20} className="lg:w-7 lg:h-7" />
-              <span className="font-semibold text-xs lg:text-sm xl:text-base">
-                I Know
-              </span>
-            </button>
-          ) : (
-            <button
-              onClick={markAsUnknown}
-              className="flex flex-col items-center justify-center gap-1 lg:gap-2 w-full rounded-xl lg:rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              <X size={20} className="lg:w-7 lg:h-7" />
-              <span className="font-semibold text-xs lg:text-sm xl:text-base">
-                Don&#39;t Know
-              </span>
-            </button>
-          )}
-
-          {/* Shuffle Button */}
-          <button
-            onClick={shuffleCards}
-            className="flex items-center justify-center w-full rounded-xl lg:rounded-2xl bg-purple-300 hover:bg-purple-400 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-            title="Shuffle Cards"
-          >
-            <Shuffle size={20} className="lg:w-7 lg:h-7" />
-          </button>
-
-          {/* Reset Button */}
-          <button
-            onClick={resetCards}
-            className="flex items-center justify-center w-full rounded-xl lg:rounded-2xl bg-purple-200 hover:bg-purple-300 text-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-            title="Reset Progress"
-          >
-            <RotateCcw size={20} className="lg:w-7 lg:h-7" />
-          </button>
         </div>
       </div>
     </div>

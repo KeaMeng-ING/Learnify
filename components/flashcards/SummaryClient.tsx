@@ -2,7 +2,7 @@
 
 import BgGradient from "@/components/layout/BgGradient";
 import { Badge } from "@/components/ui/badge";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,24 +15,107 @@ type Slide = {
   summaryId: string;
 };
 
+type SummaryProgress = {
+  currentSlideIndex: number;
+  lastUpdated: number;
+};
+
 const SummaryClient = ({
   title,
   minRead,
   slides,
   overview,
   keyTakeaway,
+  summaryId,
 }: {
   title: string;
   minRead: number | null;
   slides: Slide[];
   overview: string | null;
   keyTakeaway: string | null;
+  summaryId: string;
 }) => {
-  const [isLoaded] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(-1);
+  const [isMarking, setIsMarking] = useState(false);
 
+  const STORAGE_KEY = `summary_progress_${summaryId}`;
   const totalSlides = slides.length + 2;
   const progress = currentSlideIndex + 2;
+
+  // Load progress from localStorage
+  useEffect(() => {
+    const loadProgress = () => {
+      try {
+        const savedProgress = localStorage.getItem(STORAGE_KEY);
+        if (savedProgress) {
+          const progressData: SummaryProgress = JSON.parse(savedProgress);
+          const daysSinceUpdate =
+            (Date.now() - progressData.lastUpdated) / (1000 * 60 * 60 * 24);
+
+          // Only restore if less than 30 days old
+          if (daysSinceUpdate < 30) {
+            setCurrentSlideIndex(progressData.currentSlideIndex);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading summary progress:", error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    loadProgress();
+  }, [summaryId, STORAGE_KEY]);
+
+  // Save progress to localStorage whenever slide changes
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const saveProgress = () => {
+      try {
+        const progressData: SummaryProgress = {
+          currentSlideIndex,
+          lastUpdated: Date.now(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+      } catch (error) {
+        console.error("Error saving summary progress:", error);
+      }
+    };
+
+    saveProgress();
+  }, [currentSlideIndex, isLoaded, STORAGE_KEY]);
+
+  // Mark summary as complete when reaching the end
+  useEffect(() => {
+    if (currentSlideIndex === slides.length && !isMarking) {
+      markSummaryAsComplete();
+    }
+  }, [currentSlideIndex, slides.length, isMarking]);
+
+  const markSummaryAsComplete = async () => {
+    setIsMarking(true);
+    try {
+      const response = await fetch("/api/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: summaryId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark summary as complete");
+      }
+
+      console.log("Summary marked as complete");
+    } catch (error) {
+      console.error("Error marking summary as complete:", error);
+    } finally {
+      setIsMarking(false);
+    }
+  };
 
   const nextSlide = () => {
     if (currentSlideIndex < slides.length) {
@@ -112,7 +195,7 @@ const SummaryClient = ({
             </div>
           </div>
 
-          <Link href="/dashboard" className="-translate-y-1.5">
+          <Link href="/dashboard?feature=summary" className="-translate-y-1.5">
             <Button
               variant="secondary"
               className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300 rounded-full"
@@ -135,18 +218,28 @@ const SummaryClient = ({
         <div className="w-full max-w-3xl mx-auto px-4 h-full flex items-center py-4">
           <div className="bg-white/60 backdrop-blur-lg rounded-3xl shadow-xl border border-gray-200/50 p-6 lg:p-8 w-full h-full max-h-[calc(100vh-200px)]">
             <div className="bg-white rounded-3xl shadow-2xl p-6 lg:p-8 border border-purple-500/20 h-full flex flex-col mx-auto max-w-[500px]">
-              {/* Dashed Progress Bar */}
+              {/* Progress Bar */}
               <div className="mb-6 flex-shrink-0">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-2 mb-2">
                   {Array.from({ length: totalSlides }).map((_, index) => (
                     <div
                       key={index}
                       className={cn(
                         "h-2 flex-1 rounded-full transition-all duration-300",
-                        index < progress ? "bg-purple-500" : "bg-gray-200"
+                        index < progress ? "bg-purple-500" : "bg-gray-200",
                       )}
                     />
                   ))}
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                  <span>
+                    {currentSlideIndex === -1
+                      ? "Overview"
+                      : currentSlideIndex === slides.length
+                        ? "Key Takeaway"
+                        : `Slide ${currentSlideIndex + 1} of ${slides.length}`}
+                  </span>
+                  <span>{Math.round((progress / totalSlides) * 100)}%</span>
                 </div>
               </div>
 
@@ -156,7 +249,7 @@ const SummaryClient = ({
                   className={cn(
                     "mb-6",
                     currentContent.isKeyTakeaway &&
-                      "p-6 bg-purple-50 rounded-xl border-l-4 border-purple-500"
+                      "p-6 bg-purple-50 rounded-xl border-l-4 border-purple-500",
                   )}
                 >
                   <h2
@@ -166,7 +259,7 @@ const SummaryClient = ({
                       currentContent.isKeyTakeaway && "text-purple-800",
                       !currentContent.isOverview &&
                         !currentContent.isKeyTakeaway &&
-                        "text-purple-600"
+                        "text-purple-600",
                     )}
                   >
                     {currentContent.heading}
@@ -186,7 +279,7 @@ const SummaryClient = ({
                     "flex items-center justify-center transition-all duration-300 rounded-full w-10 h-10 p-0",
                     currentSlideIndex === -1
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl"
+                      : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl",
                   )}
                 >
                   <ChevronLeft size={20} />
@@ -207,7 +300,7 @@ const SummaryClient = ({
                     "flex items-center justify-center transition-all duration-300 rounded-full w-10 h-10 p-0",
                     currentSlideIndex === slides.length
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl"
+                      : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl",
                   )}
                 >
                   <ChevronRight size={20} />

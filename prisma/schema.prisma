@@ -52,6 +52,7 @@ model Summary {
   keyTakeaway String?  @map("key_takeaway")
   minRead     Int?     @map("min_read")
   userId      String   @map("user_id")
+  complete    Boolean? @default(false)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
