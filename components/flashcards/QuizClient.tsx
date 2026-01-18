@@ -28,7 +28,6 @@ type QuizProgress = {
   currentIndex: number;
   knownCards: string[];
   unknownCards: string[];
-  hasCelebrated: boolean;
   lastUpdated: number;
 };
 
@@ -51,10 +50,9 @@ export default function QuizClient({
   const [slideDirection, setSlideDirection] = useState("");
   const [knownCards, setKnownCards] = useState(new Set<string>());
   const [unknownCards, setUnknownCards] = useState(new Set<string>());
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [hasCelebrated, setHasCelebrated] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [cardScale, setCardScale] = useState(1);
+  const [cardOpacity, setCardOpacity] = useState(1);
 
   const STORAGE_KEY = `quiz_progress_${id}`;
 
@@ -71,7 +69,6 @@ export default function QuizClient({
             setCurrentIndex(progress.currentIndex);
             setKnownCards(new Set(progress.knownCards));
             setUnknownCards(new Set(progress.unknownCards));
-            setHasCelebrated(progress.hasCelebrated);
           }
         }
       } catch (error) {
@@ -93,7 +90,6 @@ export default function QuizClient({
           currentIndex,
           knownCards: Array.from(knownCards),
           unknownCards: Array.from(unknownCards),
-          hasCelebrated,
           lastUpdated: Date.now(),
         };
 
@@ -104,14 +100,7 @@ export default function QuizClient({
     };
 
     saveProgress();
-  }, [
-    currentIndex,
-    knownCards,
-    unknownCards,
-    hasCelebrated,
-    isLoaded,
-    STORAGE_KEY,
-  ]);
+  }, [currentIndex, knownCards, unknownCards, isLoaded, STORAGE_KEY]);
 
   const clearProgress = () => {
     try {
@@ -148,38 +137,50 @@ export default function QuizClient({
 
   const nextCard = () => {
     if (currentIndex < cards.length - 1) {
+      // Exit animation
+      setCardScale(0.8);
+      setCardOpacity(0);
       setSlideDirection("slide-left");
+
       setTimeout(() => {
         const nextIndex = currentIndex + 1;
         setCurrentIndex(nextIndex);
         setIsFlipped(false);
         setSlideDirection("");
+        // Reset for enter animation
+        setCardScale(0.8);
+        setCardOpacity(0);
 
-        if (nextIndex >= cards.length - 1 && !hasCelebrated) {
-          setShowCelebration(true);
-          setShowConfetti(true);
-          setHasCelebrated(true);
-          setTimeout(() => setShowConfetti(false), 5000);
-        }
-      }, 200);
-    } else {
-      if (!hasCelebrated) {
-        setShowCelebration(true);
-        setShowConfetti(true);
-        setHasCelebrated(true);
-        setTimeout(() => setShowConfetti(false), 5000);
-      }
+        // Trigger enter animation
+        setTimeout(() => {
+          setCardScale(1);
+          setCardOpacity(1);
+        }, 50);
+      }, 300);
     }
   };
 
   const prevCard = () => {
     if (currentIndex > 0) {
+      // Exit animation
+      setCardScale(0.8);
+      setCardOpacity(0);
       setSlideDirection("slide-right");
+
       setTimeout(() => {
         setCurrentIndex(currentIndex - 1);
         setIsFlipped(false);
         setSlideDirection("");
-      }, 200);
+        // Reset for enter animation
+        setCardScale(0.8);
+        setCardOpacity(0);
+
+        // Trigger enter animation
+        setTimeout(() => {
+          setCardScale(1);
+          setCardOpacity(1);
+        }, 50);
+      }, 300);
     }
   };
 
@@ -189,13 +190,9 @@ export default function QuizClient({
     setSlideDirection("");
     setKnownCards(new Set());
     setUnknownCards(new Set());
-    setShowCelebration(false);
-    setHasCelebrated(false);
     clearProgress();
   };
 
-  const knownCount = knownCards.size;
-  const unknownCount = unknownCards.size;
   const isCurrentCardKnown = knownCards.has(currentCard?.id);
   const isCurrentCardUnknown = unknownCards.has(currentCard?.id);
 
@@ -293,46 +290,56 @@ export default function QuizClient({
             <div className="bg-white rounded-3xl shadow-2xl p-6 lg:p-8 border border-purple-500/20 h-full flex flex-col mx-auto max-w-[500px]">
               {/* Progress Bar */}
               <div className="mb-6 flex-shrink-0">
-                <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center justify-between gap-2 mb-2 cursor-pointer">
                   {Array.from({ length: cards.length }).map((_, index) => {
                     const cardId = cards[index].id;
                     const isKnown = knownCards.has(cardId);
                     const isUnknown = unknownCards.has(cardId);
+                    const isCurrentCard = index === currentIndex;
 
                     return (
                       <div
                         key={index}
+                        onClick={() => {
+                          setCurrentIndex(index);
+                          setIsFlipped(false);
+                        }}
                         className={cn(
-                          "h-2 flex-1 rounded-full transition-all duration-300",
-                          isKnown && "bg-green-500",
-                          isUnknown && "bg-red-500",
+                          "flex-1 rounded-full transition-all duration-300 cursor-pointer",
+                          isCurrentCard && "h-3",
+                          !isCurrentCard && "h-2",
+                          isKnown && "bg-purple-500 hover:bg-purple-600",
+                          isUnknown && "bg-purple-100 hover:bg-purple-200",
                           !isKnown &&
                             !isUnknown &&
                             index <= currentIndex &&
-                            "bg-gray-400",
+                            "bg-gray-400 hover:bg-gray-500",
                           !isKnown &&
                             !isUnknown &&
                             index > currentIndex &&
-                            "bg-gray-200",
+                            "bg-gray-200 hover:bg-gray-300",
                         )}
+                        title={`Jump to question ${index + 1}`}
                       />
                     );
                   })}
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-2">
-                  <span>Known: {knownCount}</span>
-                  <span>Unknown: {unknownCount}</span>
                 </div>
               </div>
 
               {/* Card Content */}
               <div className="flex-1 overflow-y-auto min-h-0">
                 <div
-                  className={`relative w-full h-full transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer ${
-                    isFlipped ? "rotate-y-180" : ""
-                  }`}
+                  className={`relative w-full h-full transition-all duration-500 ease-in-out transform-style-preserve-3d cursor-pointer`}
                   onClick={flipCard}
-                  style={{ transformStyle: "preserve-3d" }}
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: `${isFlipped ? "rotateY(180deg)" : "rotateY(0deg)"} scale(${cardScale})`,
+                    opacity: cardOpacity,
+                    transitionProperty: "transform, opacity",
+                    transitionDuration: isFlipped ? "600ms" : "500ms",
+                    transitionTimingFunction:
+                      "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  }}
                 >
                   {/* Front - Question */}
                   <div
@@ -374,7 +381,6 @@ export default function QuizClient({
                   </div>
                 </div>
               </div>
-
               {/* Navigation and Actions */}
               <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-gray-200 flex-shrink-0">
                 {/* Navigation Buttons */}

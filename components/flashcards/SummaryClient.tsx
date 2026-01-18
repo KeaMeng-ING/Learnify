@@ -102,7 +102,7 @@ const SummaryClient = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: summaryId }),
+        body: JSON.stringify({ id: summaryId, type: "summary" }),
       });
 
       if (!response.ok) {

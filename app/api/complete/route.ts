@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing quiz id" }, { status: 400 });
     }
 
-    const updatedQuiz = await prisma[type].update({
+    const updatedQuiz = await (
+      prisma[type as keyof typeof prisma] as any
+    ).update({
       where: { id },
       data: { complete: true },
     });
@@ -17,9 +19,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(updatedQuiz);
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { error: "Failed to update quiz" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }

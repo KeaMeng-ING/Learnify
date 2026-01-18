@@ -55,13 +55,13 @@ const page = async ({
 
         {isQuiz ? (
           <Link href="/upload">
-            <Button className="bg-purple-500">
+            <Button className="bg-purple-500 hover:bg-purple-600 text-white">
               <Plus /> New Quiz
             </Button>
           </Link>
         ) : (
           <Link href="/learn/summary">
-            <Button className="bg-purple-500">
+            <Button className="bg-purple-500 hover:bg-purple-600 text-white">
               <Plus /> New Summary
             </Button>
           </Link>
