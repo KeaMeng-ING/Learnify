@@ -1,3 +1,4 @@
+import SubscriptionRequired from "@/components/home/SubscriptionRequired";
 import BgGradient from "@/components/layout/BgGradient";
 import { Button } from "@/components/ui/button";
 import UploadForm from "@/components/upload/UploadForm";
@@ -35,26 +36,7 @@ export default async function Page({
       <section className="min-h-screen">
         <BgGradient />
         <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-          <div className="flex flex-col items-center justify-center gap-6 text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center ">
-              <BookOpen className="text-white" size={28} />
-            </div>
-            <h1 className="text-2xl font-bold">Subscription Required</h1>
-            <p className="text-lg">
-              Start Experience with our AI-Powered Quiz by subscribing to a
-              plan.
-            </p>
-            <Link href="/#pricing">
-              <Button
-                variant="ghost"
-                className=" bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
-              >
-                <p className="text-white font-bold flex items-center gap-2">
-                  Get Started <ArrowRight className="ml-2" />
-                </p>
-              </Button>
-            </Link>
-          </div>
+          <SubscriptionRequired />
         </div>
       </section>
     );
