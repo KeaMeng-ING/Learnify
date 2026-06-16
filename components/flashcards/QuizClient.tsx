@@ -39,7 +39,7 @@ export default function QuizClient({
   demoMode = false,
 }: {
   questions: Quiz[];
-  title: string;
+  title: string | null;
   minRead: number | null;
   id: string;
   demoMode?: boolean;
