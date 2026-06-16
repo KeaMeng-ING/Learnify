@@ -3,16 +3,15 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function NavLink({
-  href,
-  children,
-  className,
-}: {
+type NavLinkProps = {
   href: string;
   children: React.ReactNode;
   className?: string;
-}) {
+};
+
+function NavLinkInner({ href, children, className }: NavLinkProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -42,5 +41,25 @@ export default function NavLink({
     >
       {children}
     </Link>
+  );
+}
+
+export default function NavLink(props: NavLinkProps) {
+  return (
+    <Suspense
+      fallback={
+        <Link
+          href={props.href}
+          className={cn(
+            "transition-colors text-sm duration-200 text-gray-600 hover:text-purple-600",
+            props.className
+          )}
+        >
+          {props.children}
+        </Link>
+      }
+    >
+      <NavLinkInner {...props} />
+    </Suspense>
   );
 }

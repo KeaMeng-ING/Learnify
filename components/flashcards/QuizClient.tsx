@@ -431,7 +431,7 @@ export default function QuizClient({
                     className="bg-purple-100 hover:bg-purple-300 text-purple-700 flex flex-col items-center justify-center gap-1 h-16 rounded-xl"
                   >
                     <X size={20} />
-                    <span className="text-xs">Don't</span>
+                    <span className="text-xs">Don&apos;t</span>
                   </Button>
 
                   <Button
