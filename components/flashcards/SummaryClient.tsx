@@ -2,7 +2,7 @@
 
 import BgGradient from "@/components/layout/BgGradient";
 import { Badge } from "@/components/ui/badge";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -87,14 +87,7 @@ const SummaryClient = ({
     saveProgress();
   }, [currentSlideIndex, isLoaded, STORAGE_KEY]);
 
-  // Mark summary as complete when reaching the end
-  useEffect(() => {
-    if (currentSlideIndex === slides.length && !isMarking) {
-      markSummaryAsComplete();
-    }
-  }, [currentSlideIndex, slides.length, isMarking]);
-
-  const markSummaryAsComplete = async () => {
+  const markSummaryAsComplete = useCallback(async () => {
     setIsMarking(true);
     try {
       const response = await fetch("/api/complete", {
@@ -115,7 +108,14 @@ const SummaryClient = ({
     } finally {
       setIsMarking(false);
     }
-  };
+  }, [summaryId]);
+
+  // Mark summary as complete when reaching the end
+  useEffect(() => {
+    if (currentSlideIndex === slides.length && !isMarking) {
+      markSummaryAsComplete();
+    }
+  }, [currentSlideIndex, slides.length, isMarking, markSummaryAsComplete]);
 
   const nextSlide = () => {
     if (currentSlideIndex < slides.length) {

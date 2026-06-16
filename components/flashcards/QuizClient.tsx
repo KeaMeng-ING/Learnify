@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -196,20 +196,7 @@ export default function QuizClient({
   const isCurrentCardKnown = knownCards.has(currentCard?.id);
   const isCurrentCardUnknown = unknownCards.has(currentCard?.id);
 
-  // Mark quiz as complete when all cards are answered
-  useEffect(() => {
-    if (!isLoaded || demoMode) return;
-
-    const allAnswered = cards.every(
-      (card) => knownCards.has(card.id) || unknownCards.has(card.id),
-    );
-
-    if (allAnswered && cards.length > 0) {
-      markQuizAsComplete();
-    }
-  }, [knownCards, unknownCards, isLoaded, demoMode, cards]);
-
-  const markQuizAsComplete = async () => {
+  const markQuizAsComplete = useCallback(async () => {
     try {
       const response = await fetch("/api/complete", {
         method: "POST",
@@ -227,7 +214,27 @@ export default function QuizClient({
     } catch (error) {
       console.error("Error marking quiz as complete:", error);
     }
-  };
+  }, [id]);
+
+  // Mark quiz as complete when all cards are answered
+  useEffect(() => {
+    if (!isLoaded || demoMode) return;
+
+    const allAnswered = cards.every(
+      (card) => knownCards.has(card.id) || unknownCards.has(card.id),
+    );
+
+    if (allAnswered && cards.length > 0) {
+      markQuizAsComplete();
+    }
+  }, [
+    knownCards,
+    unknownCards,
+    isLoaded,
+    demoMode,
+    cards,
+    markQuizAsComplete,
+  ]);
 
   if (!isLoaded) {
     return (
