@@ -43,7 +43,7 @@ export const POST = async (req: NextRequest) => {
   } catch (err) {
     return NextResponse.json(
       { error: "Failed to trigger Webhook", err },
-      { status: 400 }
+      { status: 400 },
     );
   }
   return NextResponse.json({

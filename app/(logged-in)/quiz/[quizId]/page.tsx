@@ -1,4 +1,7 @@
+import { notFound } from "next/navigation";
+
 import QuizClient from "@/components/flashcards/QuizClient";
+import { prisma } from "@/lib/prisma";
 
 export default async function QuizPage({
   params,
@@ -6,8 +9,16 @@ export default async function QuizPage({
   params: Promise<{ quizId: string }>;
 }) {
   const { quizId } = await params;
-  const res = await fetch(`${process.env.DOMAIN}/api/quizzes?id=${quizId}`);
-  const data = await res.json();
+  const data = await prisma.quiz.findFirst({
+    where: { id: quizId },
+    include: {
+      questions: true,
+    },
+  });
+
+  if (!data) {
+    notFound();
+  }
 
   return (
     <QuizClient
