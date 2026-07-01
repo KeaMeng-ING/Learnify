@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Learnify
+
+Learnify turns your documents into study material. Upload a PDF and it uses AI to generate a summary (with flashcard-style slides) or a quiz, so you can review and test yourself on the content instead of re-reading it.
+
+## Features
+
+- **Upload & process PDFs** — files are parsed and stored via Cloudflare R2 / UploadThing.
+- **AI-generated summaries** — key takeaways and slide-based overviews powered by Groq and Gemini.
+- **AI-generated quizzes** — question/answer sets generated from the uploaded material.
+- **Auth** — user accounts and sessions via Clerk.
+- **Billing** — subscriptions via Stripe, with Bakong (Cambodian payment) support.
+- **Dashboard** — track and revisit your quizzes and summaries.
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org) (App Router) + React 19 + TypeScript
+- [Prisma](https://www.prisma.io) + PostgreSQL
+- [Clerk](https://clerk.com) for authentication
+- [Tailwind CSS](https://tailwindcss.com) + shadcn/ui components
+- [Groq SDK](https://groq.com) / [Google Generative AI](https://ai.google.dev) + LangChain for AI generation
+- [Stripe](https://stripe.com) and Bakong for payments
+- Cloudflare R2 for file storage
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+
+- A PostgreSQL database (e.g. [Neon](https://neon.tech))
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install dependencies:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   npm install
+   ```
 
-## Learn More
+2. Copy the example environment file and fill in your own credentials:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   cp .env.example .env
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   You'll need keys for Clerk, Groq, Gemini, Cloudflare R2, UploadThing, Stripe, and Bakong — see `.env.example` for the full list.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Generate the Prisma client and run database migrations:
 
-## Deploy on Vercel
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Run the development server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## Scripts
+
+- `npm run dev` — start the dev server
+- `npm run build` — generate the Prisma client and build for production
+- `npm run start` — start the production server
+- `npm run lint` / `npm run lint:fix` — lint the codebase
+
+## Project Structure
+
+- `app/` — Next.js App Router pages and API routes (`api/upload`, `api/summaries`, `api/quizzes`, `api/payments`, `api/complete`)
+- `app/(logged-in)/` — authenticated routes: dashboard, upload, summary, quiz
+- `components/` — UI components, organized by feature (`upload`, `flashcards`, `allQuizzes`, `home`, `layout`, `ui`)
+- `prisma/schema.prisma` — database schema (users, quizzes, summaries, slides, questions, payments)
+- `lib/` / `utils/` — shared helpers
